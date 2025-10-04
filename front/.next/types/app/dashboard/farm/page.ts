@@ -1,4 +1,4 @@
-// File: /home/fisuan/Desktop/spaceapp-/front/src/app/dashboard/farm/page.tsx
+// File: C:\VScode\Projects\spaceapp-\front\src\app\dashboard\farm\page.tsx
 import * as entry from '../../../../../src/app/dashboard/farm/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

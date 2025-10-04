@@ -1,6 +1,8 @@
 'use client'
 
 import { useSpaceObjects } from '@/hooks/useSpaceObjects'
+import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
+import { LineChart } from '@/components/charts/LineChart'
 
 const metricIcons = {
   farm: (
@@ -16,7 +18,8 @@ const metricIcons = {
   ),
   fire: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 2c-1.5 3-3 5.5-3 8.5 0 3 2 5.5 5 5.5s5-2.5 5-5.5c0-3-1.5-5.5-3-8.5-1 2-2 3.5-2 5.5 0 1.5-1 2.5-2 2.5z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
     </svg>
   ),
   alert: (
@@ -38,11 +41,11 @@ const metricIcons = {
   ),
 } as const
 
-type Trend = "up" | "down" | "neutral"
+type TrendDirection = "up" | "down" | "neutral"
 
 type Delta = {
   value: string
-  trend: Trend
+  trend: TrendDirection
 }
 
 type MetricCard = {
@@ -53,22 +56,29 @@ type MetricCard = {
 }
 
 const navigation = [
-  { label: "Dashboard", active: true },
-  { label: "Agriculture", sector: "agronomy" },
-  { label: "Insurance", sector: "insurance" },
-  { label: "Wildfires", sector: "wildfire" },
-  { label: "Reports" },
+  { label: "Dashboard", href: "/", active: true },
+  { label: "Agriculture", href: "/dashboard/farm", sector: "agronomy" },
+  { label: "Insurance", href: "/dashboard/insurance", sector: "insurance" },
+  { label: "Wildfires", href: "/dashboard/wildfire", sector: "wildfire" },
 ]
 
-const insightItems = ["Risk Analysis", "Predictions", "Alerts"]
+const forecastData = [
+  { date: 'Mon', risk: 67 },
+  { date: 'Tue', risk: 65 },
+  { date: 'Wed', risk: 70 },
+  { date: 'Thu', risk: 72 },
+  { date: 'Fri', risk: 68 },
+  { date: 'Sat', risk: 64 },
+  { date: 'Sun', risk: 66 },
+]
 
-const deltaStyles = (trend: Trend) => {
+const deltaStyles = (trend: TrendDirection) => {
   if (trend === "up") return "text-accent-green"
   if (trend === "down") return "text-accent-amber"
   return "text-text-subtle"
 }
 
-const deltaIcon = (trend: Trend) => {
+const deltaIcon = (trend: TrendDirection) => {
   if (trend === "up") {
     return (
       <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
@@ -100,7 +110,7 @@ const getObjectIcon = (type: string) => {
     case 'planet':
       return metricIcons.planet
     default:
-      return metricIcons.chat
+      return metricIcons.farm
   }
 }
 
@@ -170,63 +180,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-midnight text-text-primary">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 flex-col border-r border-border-subtle bg-midnight-deep p-6 lg:flex">
-          <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-blue/10 text-accent-blue font-semibold">DP</div>
-            <div>
-              <p className="text-sm text-text-subtle">NASA Space Apps 2024</p>
-              <p className="text-lg font-semibold text-text-primary">Data Pathways</p>
-            </div>
-          </div>
-
-          <nav className="flex flex-1 flex-col gap-8">
-            <div className="flex flex-col gap-1">
-              {navigation.map((item) => (
-                <button
-                  key={item.label}
-                  className={`flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium transition-colors ${
-                    item.active
-                      ? "bg-accent-blue/10 text-accent-blue"
-                      : "text-text-subtle hover:bg-white/5 hover:text-text-primary"
-                  }`}
-                >
-                  <span
-                    className={`h-5 w-5 rounded-lg border border-border-subtle ${
-                      item.active ? "border-accent-blue/60 bg-accent-blue/10" : ""
-                    }`}
-                  />
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <div>
-              <p className="mb-3 text-xs uppercase tracking-wide text-text-subtle">Insight</p>
-              <div className="flex flex-col gap-1">
-                {insightItems.map((item) => (
-                  <button
-                    key={item}
-                    className="flex items-center gap-3 rounded-xl px-4 py-2 text-sm font-medium text-text-subtle transition-colors hover:bg-white/5 hover:text-text-primary"
-                  >
-                    <span className="h-5 w-5 rounded-lg border border-border-subtle" />
-                    {item}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </nav>
-
-          <div className="mt-auto rounded-2xl bg-navy-800 p-5">
-            <p className="text-sm font-semibold text-text-primary">Sync Data</p>
-            <p className="text-xs text-text-muted">Real-time NASA & Weather APIs</p>
-            <button
-              onClick={refreshData}
-              className="mt-4 w-full rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80"
-            >
-              Refresh Data
-            </button>
-          </div>
-        </aside>
+        <Sidebar activeRoute="dashboard" />
 
         <div className="flex-1 overflow-hidden">
           <header className="border-b border-border-subtle bg-navy-800/40 backdrop-blur">
@@ -262,118 +216,103 @@ export default function Home() {
                 const iconColors = ['text-accent-green', 'text-accent-purple', 'text-accent-orange', 'text-accent-amber']
                 const bgColors = ['bg-accent-green/10', 'bg-accent-purple/10', 'bg-accent-orange/10', 'bg-accent-amber/10']
                 return (
-                  <div key={metric.label} className="rounded-2xl bg-navy-800/60 p-6 shadow-card border border-border-subtle">
-                    <div className="mb-6 flex items-center justify-between text-text-subtle">
-                      <span className="text-sm font-medium text-text-secondary">{metric.label}</span>
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${bgColors[idx]} ${iconColors[idx]}`}>
-                        {metricIcons[metric.icon]}
-                      </div>
-                    </div>
-                    <div className="flex items-end justify-between">
-                      <p className="text-3xl font-bold text-white">{metric.value}</p>
-                      <TrendDelta delta={metric.delta} />
-                    </div>
-                  </div>
+                  <StatCard
+                    key={metric.label}
+                    label={metric.label}
+                    value={metric.value}
+                    icon={metricIcons[metric.icon]}
+                    trend={{ value: metric.delta.value, direction: metric.delta.trend }}
+                    iconColor={iconColors[idx]}
+                    iconBg={bgColors[idx]}
+                  />
                 )
               })}
             </section>
 
+            <ChartCard title="7-Day Risk Forecast" subtitle="Predicted environmental risk levels">
+              <LineChart
+                data={forecastData}
+                xAxisKey="date"
+                lines={[{ dataKey: 'risk', color: '#f59e0b', name: 'Risk Score' }]}
+                height={250}
+              />
+            </ChartCard>
+
             <div className="grid gap-6 lg:grid-cols-3">
-              <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green">
-                      {metricIcons.farm}
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-white">Agriculture</h2>
-                      <p className="text-xs text-text-subtle">Farm Risk Monitoring</p>
-                    </div>
-                  </div>
-                  <span className="rounded-lg bg-accent-green/10 px-2 py-1 text-xs font-medium text-accent-green">Active</span>
-                </div>
+              <ChartCard
+                title="Agriculture"
+                subtitle="Farm Risk Monitoring"
+                icon={metricIcons.farm}
+                action={<Badge variant="green" size="sm">Active</Badge>}
+              >
                 <div className="space-y-3">
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Current Temperature</p>
                     <p className="text-lg font-semibold text-white">28°C <span className="text-xs text-accent-green">↑ +3°</span></p>
                   </div>
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Frost Risk (24h)</p>
                     <p className="text-lg font-semibold text-white">12% <span className="text-xs text-text-subtle">Low</span></p>
                   </div>
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">AQI Impact</p>
                     <p className="text-lg font-semibold text-white">Moderate <span className="text-xs text-accent-amber">PM2.5: 45</span></p>
                   </div>
                 </div>
-                <button className="mt-4 w-full rounded-lg bg-navy-600 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-navy-500">
+                <a href="/dashboard/farm" className="mt-4 block w-full rounded-lg bg-navy-600 px-3 py-2 text-center text-xs font-medium text-text-secondary hover:bg-navy-500 transition-colors">
                   View Details →
-                </button>
-              </section>
+                </a>
+              </ChartCard>
 
-              <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-purple/10 text-accent-purple">
-                      {metricIcons.shield}
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-white">Insurance</h2>
-                      <p className="text-xs text-text-subtle">Claims Verification</p>
-                    </div>
-                  </div>
-                  <span className="rounded-lg bg-accent-amber/10 px-2 py-1 text-xs font-medium text-accent-amber">23 Claims</span>
-                </div>
+              <ChartCard
+                title="Insurance"
+                subtitle="Claims Verification"
+                icon={metricIcons.shield}
+                action={<Badge variant="amber" size="sm">23 Claims</Badge>}
+              >
                 <div className="space-y-3">
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Verified Claims</p>
                     <p className="text-lg font-semibold text-white">18 <span className="text-xs text-accent-green">✓ NASA Data</span></p>
                   </div>
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Pending Review</p>
                     <p className="text-lg font-semibold text-white">5 <span className="text-xs text-text-subtle">Manual Check</span></p>
                   </div>
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Fraud Risk</p>
                     <p className="text-lg font-semibold text-white">Low <span className="text-xs text-accent-green">8% avg</span></p>
                   </div>
                 </div>
-                <button className="mt-4 w-full rounded-lg bg-navy-600 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-navy-500">
+                <a href="/dashboard/insurance" className="mt-4 block w-full rounded-lg bg-navy-600 px-3 py-2 text-center text-xs font-medium text-text-secondary hover:bg-navy-500 transition-colors">
                   Generate Report →
-                </button>
-              </section>
+                </a>
+              </ChartCard>
 
-              <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-orange/10 text-accent-orange">
-                      {metricIcons.fire}
-                    </div>
-                    <div>
-                      <h2 className="text-base font-bold text-white">Wildfires</h2>
-                      <p className="text-xs text-text-subtle">Real-time Monitoring</p>
-                    </div>
-                  </div>
-                  <span className="rounded-lg bg-accent-red/10 px-2 py-1 text-xs font-medium text-accent-red">47 Active</span>
-                </div>
+              <ChartCard
+                title="Wildfires"
+                subtitle="Real-time Monitoring"
+                icon={metricIcons.fire}
+                action={<Badge variant="red" size="sm">47 Active</Badge>}
+              >
                 <div className="space-y-3">
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Fire Danger Index</p>
                     <p className="text-lg font-semibold text-white">92/100 <span className="text-xs text-accent-red">Critical</span></p>
                   </div>
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Wind Speed</p>
                     <p className="text-lg font-semibold text-white">25 km/h <span className="text-xs text-accent-amber">→ NE</span></p>
                   </div>
-                  <div className="rounded-lg bg-navy-900/60 p-3">
+                  <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">AQI (Smoke)</p>
                     <p className="text-lg font-semibold text-white">201 <span className="text-xs text-accent-red">Hazardous</span></p>
                   </div>
                 </div>
-                <button className="mt-4 w-full rounded-lg bg-navy-600 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-navy-500">
+                <a href="/dashboard/wildfire" className="mt-4 block w-full rounded-lg bg-navy-600 px-3 py-2 text-center text-xs font-medium text-text-secondary hover:bg-navy-500 transition-colors">
                   View Hotspots →
-                </button>
-              </section>
+                </a>
+              </ChartCard>
             </div>
           </div>
         </div>

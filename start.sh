@@ -23,12 +23,42 @@ cd ..
 echo
 echo "Запуск бэкенда и фронтенда..."
 
-# Запуск бэкенда в фоне
-gnome-terminal --title="SpaceApp Backend" -- bash -c "cd back && python app.py; exec bash" &
-sleep 3
+# Абсолютные пути для логов/пидов
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_DIR="$SCRIPT_DIR/logs"
+mkdir -p "$LOG_DIR"
 
-# Запуск фронтенда в фоне
-gnome-terminal --title="SpaceApp Frontend" -- bash -c "cd front && npm run dev; exec bash" &
+# Запуск бэкенда в фоне (порт 8080)
+echo "Старт бэкенда..."
+( cd "$SCRIPT_DIR/back" && nohup python app.py > "$LOG_DIR/backend.log" 2>&1 & echo $! > "$LOG_DIR/backend.pid" )
+
+# Ожидание здоровья бэкенда
+for i in {1..30}; do
+  if curl -fsS http://localhost:8080/health > /dev/null 2>&1; then
+    echo "Бэкенд доступен на http://localhost:8080"
+    break
+  fi
+  sleep 1
+  if [ "$i" -eq 30 ]; then
+    echo "Внимание: бэкенд не ответил за 30 секунд. См. logs/backend.log"
+  fi
+done
+
+# Запуск фронтенда в фоне (Next dev на 3000)
+echo "Старт фронтенда..."
+( cd "$SCRIPT_DIR/front" && nohup npm run dev -- --port 3000 > "$LOG_DIR/frontend.log" 2>&1 & echo $! > "$LOG_DIR/frontend.pid" )
+
+# Ожидание фронтенда
+for i in {1..60}; do
+  if curl -fsS http://localhost:3000 > /dev/null 2>&1; then
+    echo "Фронтенд доступен на http://localhost:3000"
+    break
+  fi
+  sleep 1
+  if [ "$i" -eq 60 ]; then
+    echo "Внимание: фронтенд не ответил за 60 секунд. См. logs/frontend.log"
+  fi
+done
 
 echo
 echo "SpaceApp запущен!"
@@ -40,7 +70,6 @@ echo "Swagger: http://localhost:3000/docs"
 echo "ReDoc: http://localhost:3000/redoc"
 echo
 echo "=== Прямой бэкенд (для разработки) ==="
-echo "API: http://localhost:8001"
+echo "API: http://localhost:8080"
 echo
-echo "Нажмите Enter для завершения..."
-read
+echo "Логи: $LOG_DIR/backend.log и $LOG_DIR/frontend.log"

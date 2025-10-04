@@ -1,3 +1,17 @@
+import {
+  WeatherCurrent,
+  WeatherForecast,
+  FarmRecommendation,
+  FarmAlert,
+  InsuranceRisk,
+  Claim,
+  Fire,
+  FireSpreadForecast,
+  AirQualityArea,
+  WildfireRiskRegion,
+  ApiResponse,
+} from './types'
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1'
 
 export interface SpaceObject {
@@ -93,6 +107,63 @@ class ApiClient {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     return await response.json()
+  }
+
+  // === Weather & Farm Endpoints ===
+  async getCurrentWeather(lat: number, lon: number): Promise<ApiResponse<WeatherCurrent>> {
+    return this.request(`/weather/current?lat=${lat}&lon=${lon}`)
+  }
+
+  async getWeatherForecast(lat: number, lon: number, days: number = 7): Promise<ApiResponse<WeatherForecast[]>> {
+    return this.request(`/weather/forecast?lat=${lat}&lon=${lon}&days=${days}`)
+  }
+
+  async getFarmRecommendations(lat: number, lon: number): Promise<ApiResponse<FarmRecommendation>> {
+    return this.request(`/recommendations/farm?lat=${lat}&lon=${lon}`)
+  }
+
+  async getFarmAlerts(lat: number, lon: number): Promise<ApiResponse<FarmAlert[]>> {
+    return this.request(`/alerts/farm?lat=${lat}&lon=${lon}`)
+  }
+
+  // === Insurance Endpoints ===
+  async getInsuranceRisks(region: string, period: string): Promise<ApiResponse<InsuranceRisk>> {
+    return this.request(`/insurance/risks?region=${region}&period=${period}`)
+  }
+
+  async getClaimVerification(claimId: string): Promise<ApiResponse<Claim>> {
+    return this.request(`/insurance/claims/${claimId}`)
+  }
+
+  async getRiskForecast(period: string = 'next_month'): Promise<ApiResponse<WildfireRiskRegion[]>> {
+    return this.request(`/insurance/forecast?period=${period}`)
+  }
+
+  async downloadClaimReport(claimId: string): Promise<Blob> {
+    const url = `${this.baseUrl}/insurance/claims/${claimId}/report?format=pdf`
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    return await response.blob()
+  }
+
+  // === Wildfire Endpoints ===
+  async getActiveFires(region?: string): Promise<ApiResponse<{ fires: Fire[]; total_count: number; danger_index: number }>> {
+    const query = region ? `?region=${region}` : ''
+    return this.request(`/wildfire/active-fires${query}`)
+  }
+
+  async getFireSpreadForecast(fireId: string): Promise<ApiResponse<FireSpreadForecast>> {
+    return this.request(`/wildfire/fires/${fireId}/spread-forecast`)
+  }
+
+  async getAirQualitySmoke(affectedOnly: boolean = true): Promise<ApiResponse<{ affected_areas: AirQualityArea[] }>> {
+    return this.request(`/wildfire/air-quality?affected=${affectedOnly}`)
+  }
+
+  async getWildfireRiskForecast(hours: number = 48): Promise<ApiResponse<{ regions: WildfireRiskRegion[] }>> {
+    return this.request(`/wildfire/risk-forecast?hours=${hours}`)
   }
 }
 

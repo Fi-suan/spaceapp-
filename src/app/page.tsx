@@ -1,6 +1,68 @@
+import Navigation from '@/components/Navigation'
+import MissionCard from '@/components/MissionCard'
+import PlanetCard from '@/components/PlanetCard'
+import { ChipGroup } from '@/components/Chip'
+
 export default function Home() {
+  const navigationItems = [
+    { label: 'Home', href: '#', active: true },
+    { label: 'Missions', href: '#missions' },
+    { label: 'Planets', href: '#planets' },
+    { label: 'About', href: '#about' }
+  ]
+
+  const missions = [
+    {
+      title: 'Artemis Program',
+      description: 'NASA\'s lunar exploration program to establish sustainable human presence on the Moon.',
+      status: 'active' as const,
+      launchDate: new Date('2024-11-15'),
+      agency: 'NASA'
+    },
+    {
+      title: 'Mars Sample Return',
+      description: 'Mission to collect and return samples from Mars for detailed analysis.',
+      status: 'planned' as const,
+      launchDate: new Date('2028-06-01'),
+      agency: 'NASA'
+    },
+    {
+      title: 'James Webb Space Telescope',
+      description: 'Advanced space telescope for infrared astronomy and exoplanet research.',
+      status: 'active' as const,
+      launchDate: new Date('2021-12-25'),
+      agency: 'NASA'
+    }
+  ]
+
+  const planets = [
+    {
+      name: 'Mars',
+      type: 'terrestrial' as const,
+      distance: '225M km',
+      diameter: '6,779 km',
+      moons: 2
+    },
+    {
+      name: 'Jupiter',
+      type: 'gas_giant' as const,
+      distance: '778M km',
+      diameter: '139,820 km',
+      moons: 95
+    },
+    {
+      name: 'Saturn',
+      type: 'gas_giant' as const,
+      distance: '1.4B km',
+      diameter: '116,460 km',
+      moons: 146
+    }
+  ]
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <Navigation items={navigationItems} />
+      
       {/* Hero Section */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
@@ -15,11 +77,27 @@ export default function Home() {
             <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
               Discover the wonders of space through cutting-edge technology and immersive experiences
             </p>
+            
+            {/* Chip Group for Categories */}
+            <div className="mb-8">
+              <ChipGroup className="justify-center">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20">
+                  Missions
+                </span>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20">
+                  Planets
+                </span>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20">
+                  Astronomy
+                </span>
+              </ChipGroup>
+            </div>
+            
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors">
+              <button className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition-colors">
                 Launch Experience
               </button>
-              <button className="px-8 py-3 border border-white/30 hover:border-white/60 text-white font-semibold rounded-lg transition-colors">
+              <button className="px-8 py-3 border border-blue-600 bg-transparent hover:bg-blue-600/10 text-blue-600 font-semibold rounded-lg transition-colors">
                 Learn More
               </button>
             </div>
@@ -43,54 +121,56 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-24 bg-black/30">
+      {/* Missions Section */}
+      <section id="missions" className="py-24 bg-black/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Space Exploration Features
+              Active Space Missions
             </h2>
             <p className="text-gray-300 text-lg">
-              Experience space like never before
+              Follow the latest space exploration missions
             </p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Real-time Data</h3>
-              <p className="text-gray-300">
-                Access live satellite data and space mission information
-              </p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">3D Visualization</h3>
-              <p className="text-gray-300">
-                Interactive 3D models of planets, moons, and spacecraft
-              </p>
-            </div>
-            
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-              <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center mb-4">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Mission Tracking</h3>
-              <p className="text-gray-300">
-                Follow active space missions and their progress
-              </p>
-            </div>
+            {missions.map((mission, index) => (
+              <MissionCard
+                key={index}
+                title={mission.title}
+                description={mission.description}
+                status={mission.status}
+                launchDate={mission.launchDate}
+                agency={mission.agency}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Planets Section */}
+      <section id="planets" className="py-24 bg-black/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Solar System Planets
+            </h2>
+            <p className="text-gray-300 text-lg">
+              Explore the planets in our solar system
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {planets.map((planet, index) => (
+              <PlanetCard
+                key={index}
+                name={planet.name}
+                type={planet.type}
+                distance={planet.distance}
+                diameter={planet.diameter}
+                moons={planet.moons}
+              />
+            ))}
           </div>
         </div>
       </section>

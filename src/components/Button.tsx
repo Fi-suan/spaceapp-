@@ -2,7 +2,7 @@ import React from 'react'
 
 interface ButtonProps {
   children: React.ReactNode
-  variant?: 'primary' | 'secondary' | 'outline'
+  variant?: 'primary' | 'secondary' | 'tertiary'
   size?: 'sm' | 'md' | 'lg'
   onClick?: () => void
   className?: string
@@ -18,9 +18,9 @@ export default function Button({
   const baseClasses = 'font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2'
   
   const variantClasses = {
-    primary: 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500',
-    secondary: 'bg-gray-600 hover:bg-gray-700 text-white focus:ring-gray-500',
-    outline: 'border border-white/30 hover:border-white/60 text-white focus:ring-white/50'
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white font-bold focus:ring-blue-500',
+    secondary: 'border border-blue-600 bg-transparent hover:bg-blue-600/10 text-blue-600 focus:ring-blue-500',
+    tertiary: 'text-blue-600 hover:text-blue-700 bg-transparent focus:ring-blue-500'
   }
   
   const sizeClasses = {

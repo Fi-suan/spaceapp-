@@ -1,4 +1,4 @@
-// File: C:\VScode\Projects\spaceapp-\front\src\app\dashboard\wildfire\page.tsx
+// File: /home/fisuan/Desktop/spaceapp-/front/src/app/dashboard/wildfire/page.tsx
 import * as entry from '../../../../../src/app/dashboard/wildfire/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

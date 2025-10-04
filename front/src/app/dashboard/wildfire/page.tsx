@@ -2,8 +2,41 @@
 
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { BarChart } from '@/components/charts/BarChart'
+import { useWildfiresData } from '@/hooks/useWildfiresData'
+
+const DEFAULT_LAT = 55.7558
+const DEFAULT_LON = 37.6173
+const DEFAULT_RADIUS = 200
 
 export default function WildfireDashboard() {
+  const { data, loading, error, refetch } = useWildfiresData(DEFAULT_LAT, DEFAULT_LON, DEFAULT_RADIUS)
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-blue mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading wildfire data...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-accent-red mb-4">Error: {error}</p>
+          <button
+            onClick={refetch}
+            className="bg-accent-blue px-4 py-2 rounded-lg text-white hover:bg-accent-blue/80"
+          >
+            Retry
+          </button>
+        </div>
+      </main>
+    )
+  }
   const fwiData = [
     { region: 'Sakha', fwi: 88 },
     { region: 'Irkutsk', fwi: 82 },
@@ -47,14 +80,21 @@ export default function WildfireDashboard() {
                 <p className="text-sm text-text-secondary">Real-time fire monitoring and risk assessment</p>
               </div>
               <div className="flex items-center gap-3">
-                <Badge variant="red">
+                <Badge variant={data?.fire_danger_index.level === 'Low' ? 'green' : 'red'}>
                   <svg viewBox="0 0 8 8" fill="currentColor" className="h-2 w-2 mr-1.5">
                     <circle cx="4" cy="4" r="4" />
                   </svg>
-                  Critical Alert
+                  {data?.fire_danger_index.level || 'Low'} Risk
                 </Badge>
-                <button className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80">
-                  Emergency Report
+                <button 
+                  onClick={refetch}
+                  disabled={loading}
+                  className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80 disabled:opacity-50"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
                 </button>
               </div>
             </div>
@@ -63,34 +103,34 @@ export default function WildfireDashboard() {
           <div className="mx-auto max-w-7xl space-y-10 px-6 py-10">
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
-                label="Danger Index"
-                value="92/100"
+                label="Fire Danger Index"
+                value={`${data?.fire_danger_index.value}/100`}
                 icon={metricIcons.danger}
-                trend={{ value: "Critical", direction: "down" }}
+                trend={{ value: data?.fire_danger_index.level || "Low", direction: "neutral" }}
                 iconColor="text-accent-red"
                 iconBg="bg-accent-red/10"
               />
               <StatCard
                 label="Active Fires"
-                value="47"
+                value={`${data?.active_fires_count || 0}`}
                 icon={metricIcons.fire}
-                trend={{ value: "+15", direction: "down" }}
+                trend={{ value: `${data?.total_fires_global.toLocaleString() || 0} global`, direction: "neutral" }}
                 iconColor="text-accent-orange"
                 iconBg="bg-accent-orange/10"
               />
               <StatCard
                 label="Wind Speed"
-                value="25 km/h"
+                value={`${data?.wind_conditions.speed_kmh.toFixed(1)} km/h`}
                 icon={metricIcons.wind}
-                trend={{ value: "NE", direction: "neutral" }}
+                trend={{ value: data?.wind_conditions.direction || "N", direction: "neutral" }}
                 iconColor="text-accent-blue"
                 iconBg="bg-accent-blue/10"
               />
               <StatCard
                 label="AQI (Smoke)"
-                value="201"
+                value={`${data?.aqi_smoke.aqi || 0}`}
                 icon={metricIcons.smoke}
-                trend={{ value: "Hazardous", direction: "down" }}
+                trend={{ value: data?.aqi_smoke.status || "Good", direction: "neutral" }}
                 iconColor="text-accent-purple"
                 iconBg="bg-accent-purple/10"
               />
@@ -101,24 +141,31 @@ export default function WildfireDashboard() {
                 <BarChart data={fwiData} xAxisKey="region" bars={[{ dataKey: 'fwi', color: '#f97316' }]} height={250} />
               </ChartCard>
 
-              <ChartCard title="Active Fire Hotspots" subtitle="Current incidents">
+              <ChartCard title="Nearest Fires" subtitle={`Within ${data?.search_radius_km} km radius`}>
                 <div className="space-y-3">
-                  <div className="rounded-xl bg-accent-red/10 p-4 border border-accent-red/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-accent-red">Fire #3421</span>
-                      <Badge variant="red">Critical</Badge>
-                    </div>
-                    <p className="text-sm text-text-muted">Krasnoyarsk Region</p>
-                    <p className="text-sm text-text-muted">Area: 450 ha | Intensity: High</p>
-                  </div>
-                  <div className="rounded-xl bg-accent-orange/10 p-4 border border-accent-orange/20">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-semibold text-accent-orange">Fire #3422</span>
-                      <Badge variant="orange">High</Badge>
-                    </div>
-                    <p className="text-sm text-text-muted">Irkutsk Region</p>
-                    <p className="text-sm text-text-muted">Area: 280 ha | Intensity: Medium</p>
-                  </div>
+                  {data?.nearest_fires && data.nearest_fires.length > 0 ? (
+                    data.nearest_fires.slice(0, 5).map((fire, idx) => (
+                      <div key={idx} className={`rounded-xl p-4 border ${
+                        fire.distance_km < 50 
+                          ? 'bg-accent-red/10 border-accent-red/20' 
+                          : 'bg-accent-orange/10 border-accent-orange/20'
+                      }`}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`font-semibold ${fire.distance_km < 50 ? 'text-accent-red' : 'text-accent-orange'}`}>
+                            {fire.distance_km.toFixed(1)} km away
+                          </span>
+                          <Badge variant={fire.distance_km < 50 ? 'red' : 'orange'}>
+                            {fire.confidence}
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-text-muted">Brightness: {fire.brightness.toFixed(1)} K</p>
+                        <p className="text-sm text-text-muted">FRP: {fire.frp.toFixed(2)} MW | Date: {fire.acq_date}</p>
+                        <p className="text-xs text-text-subtle mt-1">Lat: {fire.latitude.toFixed(4)}, Lon: {fire.longitude.toFixed(4)}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-text-muted">No fires detected within {data?.search_radius_km} km</p>
+                  )}
                 </div>
               </ChartCard>
             </div>

@@ -143,3 +143,116 @@ export interface PaginatedResponse<T> {
   limit: number
 }
 
+// Dashboard API Response Types
+
+export interface DashboardAgricultureResponse {
+  current_temperature: number
+  frost_risk: {
+    percentage: number
+    status: string
+  }
+  aqi_impact: {
+    pm2_5: number
+    status: string
+  }
+  humidity: number
+  precipitation: number
+  wind_speed: number
+  location: {
+    latitude: number
+    longitude: number
+  }
+}
+
+export interface DashboardInsuranceResponse {
+  weather_verified_events: Array<{
+    date: string
+    type: string
+    severity: string
+  }>
+  climate_summary: {
+    avg_temperature: number
+    total_precipitation: number
+    days_analyzed: number
+  }
+  risk_assessment: {
+    score: number
+    level: string
+    factors: {
+      temperature: number
+      wind_speed: number
+      cloud_coverage: number
+    }
+  }
+  region: string
+  location: {
+    latitude: number
+    longitude: number
+  }
+}
+
+export interface NearestFire {
+  latitude: number
+  longitude: number
+  distance_km: number
+  brightness: number
+  frp: number
+  confidence: string
+  acq_date: string
+}
+
+export interface DashboardWildfiresResponse {
+  active_fires_count: number
+  total_fires_global: number
+  fire_danger_index: {
+    value: number
+    level: string
+  }
+  wind_conditions: {
+    speed_ms: number
+    speed_kmh: number
+    direction: string
+    degrees: number
+  }
+  aqi_smoke: {
+    aqi: number
+    status: string
+    pm2_5: number
+  }
+  nearest_fires: NearestFire[]
+  search_radius_km: number
+  location: {
+    latitude: number
+    longitude: number
+  }
+}
+
+export interface DashboardMainResponse {
+  farm_risk_index: {
+    value: number
+    trend: string
+    factors: {
+      frost_risk: boolean
+      humidity_level: number
+    }
+  }
+  fire_hotspots: {
+    global_count: number
+    trend: string
+  }
+  weather_summary: {
+    temperature: number
+    wind_speed: number
+    conditions: string
+  }
+  air_quality_summary: {
+    aqi: number
+    status: string
+  }
+  location: {
+    latitude: number
+    longitude: number
+  }
+  last_updated: string
+}
+

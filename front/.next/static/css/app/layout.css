@@ -721,6 +721,9 @@ video {
 .border-r {
   border-right-width: 1px;
 }
+.border-t {
+  border-top-width: 1px;
+}
 .border-accent-amber\/20 {
   border-color: rgb(245 158 11 / 0.2);
 }
@@ -873,6 +876,9 @@ video {
 .py-6 {
   padding-top: 1.5rem;
   padding-bottom: 1.5rem;
+}
+.pt-4 {
+  padding-top: 1rem;
 }
 .text-center {
   text-align: center;
@@ -1040,6 +1046,9 @@ main {
 }
 .hover\:underline:hover {
   text-decoration-line: underline;
+}
+.disabled\:opacity-50:disabled {
+  opacity: 0.5;
 }
 @media (min-width: 768px) {
 

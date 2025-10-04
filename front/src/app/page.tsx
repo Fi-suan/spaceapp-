@@ -1,8 +1,12 @@
 'use client'
 
 import { useSpaceObjects } from '@/hooks/useSpaceObjects'
+import { useMainDashboard } from '@/hooks/useMainDashboard'
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { LineChart } from '@/components/charts/LineChart'
+
+const DEFAULT_LAT = 55.7558
+const DEFAULT_LON = 37.6173
 
 const metricIcons = {
   farm: (
@@ -115,7 +119,11 @@ const getObjectIcon = (type: string) => {
 }
 
 export default function Home() {
-  const { spaceObjects, loading, error, getTypeStats, totalCount, refreshData } = useSpaceObjects()
+  const { spaceObjects, loading: spaceLoading, error: spaceError, getTypeStats, totalCount, refreshData } = useSpaceObjects()
+  const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useMainDashboard(DEFAULT_LAT, DEFAULT_LON)
+
+  const loading = spaceLoading || dashboardLoading
+  const error = spaceError || dashboardError
 
   if (loading) {
     return (
@@ -134,7 +142,10 @@ export default function Home() {
         <div className="text-center">
           <p className="text-accent-red mb-4">Data loading error: {error}</p>
           <button
-            onClick={refreshData}
+            onClick={() => {
+              refreshData()
+              refetch()
+            }}
             className="bg-accent-blue px-4 py-2 rounded-lg text-white hover:bg-accent-blue/80"
           >
             Retry Connection
@@ -150,30 +161,42 @@ export default function Home() {
   const starCount = typeStats['star'] || 0
   const otherCount = totalObjects - planetCount - starCount
 
+  const getTrendDirection = (trend: string): TrendDirection => {
+    if (trend === 'increasing') return 'down'
+    if (trend === 'decreasing') return 'up'
+    return 'neutral'
+  }
+
   const metrics: MetricCard[] = [
     {
       label: "Farm Risk Index",
-      value: "67",
+      value: dashboardData?.farm_risk_index.value.toString() || "67",
       icon: "farm",
-      delta: { value: "-12%", trend: "up" },
+      delta: { 
+        value: dashboardData?.farm_risk_index.trend || "stable", 
+        trend: getTrendDirection(dashboardData?.farm_risk_index.trend || 'stable')
+      },
     },
     {
-      label: "Active Claims",
-      value: "23",
+      label: "Temperature",
+      value: `${dashboardData?.weather_summary.temperature.toFixed(1) || '0'}°C`,
       icon: "shield",
-      delta: { value: "+8%", trend: "down" },
+      delta: { value: dashboardData?.weather_summary.conditions || "Clouds", trend: "neutral" },
     },
     {
       label: "Fire Hotspots",
-      value: "47",
+      value: dashboardData?.fire_hotspots.global_count.toLocaleString() || "0",
       icon: "fire",
-      delta: { value: "+15", trend: "down" },
+      delta: { 
+        value: dashboardData?.fire_hotspots.trend || "stable", 
+        trend: getTrendDirection(dashboardData?.fire_hotspots.trend || 'stable')
+      },
     },
     {
-      label: "Critical Alerts",
-      value: "5",
+      label: "Air Quality",
+      value: dashboardData?.air_quality_summary.status || "Fair",
       icon: "alert",
-      delta: { value: "High", trend: "down" },
+      delta: { value: `AQI ${dashboardData?.air_quality_summary.aqi || 0}`, trend: "neutral" },
     },
   ]
 
@@ -198,13 +221,17 @@ export default function Home() {
                   {error ? '● Offline' : '● Live Data'}
                 </span>
                 <button
-                  onClick={refreshData}
+                  onClick={() => {
+                    refreshData()
+                    refetch()
+                  }}
                   className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80"
+                  disabled={loading}
                 >
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className="h-4 w-4">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}>
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Export Report
+                  Refresh
                 </button>
               </div>
             </div>

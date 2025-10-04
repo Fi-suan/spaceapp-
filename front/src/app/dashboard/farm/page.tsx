@@ -3,6 +3,10 @@
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { CheckIcon, AlertTriangleIcon, SproutIcon } from '@/components/shared/Icons'
 import { LineChart } from '@/components/charts/LineChart'
+import { useAgricultureData } from '@/hooks/useAgricultureData'
+
+const DEFAULT_LAT = 55.7558
+const DEFAULT_LON = 37.6173
 
 const metricIcons = {
   thermometer: (
@@ -47,6 +51,35 @@ const aqiData = [
 ]
 
 export default function FarmDashboard() {
+  const { data, loading, error, refetch } = useAgricultureData(DEFAULT_LAT, DEFAULT_LON)
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-blue mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading agricultural data...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-accent-red mb-4">Error: {error}</p>
+          <button
+            onClick={refetch}
+            className="bg-accent-blue px-4 py-2 rounded-lg text-white hover:bg-accent-blue/80"
+          >
+            Retry
+          </button>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <main className="min-h-screen bg-midnight text-text-primary">
       <div className="flex min-h-screen">
@@ -61,11 +94,15 @@ export default function FarmDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <Badge variant="green">● Live Data</Badge>
-                <button className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80">
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className="h-4 w-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <button 
+                  onClick={refetch}
+                  disabled={loading}
+                  className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80 disabled:opacity-50"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Export Report
+                  Refresh
                 </button>
               </div>
             </div>
@@ -74,36 +111,36 @@ export default function FarmDashboard() {
           <div className="mx-auto max-w-7xl space-y-10 px-6 py-10">
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
-                label="Temperature"
-                value="22°C"
+                label="Current Temperature"
+                value={`${data?.current_temperature.toFixed(1)}°C`}
                 icon={metricIcons.thermometer}
-                trend={{ value: "+2°", direction: "up" }}
+                trend={{ value: "Real-time", direction: "neutral" }}
                 iconColor="text-accent-blue"
                 iconBg="bg-accent-blue/10"
               />
               <StatCard
+                label="Frost Risk"
+                value={`${data?.frost_risk.percentage}%`}
+                icon={metricIcons.alert}
+                trend={{ value: data?.frost_risk.status || "Low", direction: "neutral" }}
+                iconColor="text-accent-amber"
+                iconBg="bg-accent-amber/10"
+              />
+              <StatCard
                 label="Humidity"
-                value="65%"
+                value={`${data?.humidity.toFixed(1)}%`}
                 icon={metricIcons.droplet}
-                trend={{ value: "-5%", direction: "down" }}
+                trend={{ value: "Normal", direction: "neutral" }}
                 iconColor="text-accent-green"
                 iconBg="bg-accent-green/10"
               />
               <StatCard
                 label="Wind Speed"
-                value="12 km/h"
+                value={`${data?.wind_speed.toFixed(1)} m/s`}
                 icon={metricIcons.wind}
-                trend={{ value: "Optimal", direction: "neutral" }}
+                trend={{ value: `${((data?.wind_speed || 0) * 3.6).toFixed(1)} km/h`, direction: "neutral" }}
                 iconColor="text-accent-purple"
                 iconBg="bg-accent-purple/10"
-              />
-              <StatCard
-                label="Frost Risk"
-                value="Low"
-                icon={metricIcons.alert}
-                trend={{ value: "8%", direction: "up" }}
-                iconColor="text-accent-amber"
-                iconBg="bg-accent-amber/10"
               />
             </section>
 
@@ -120,13 +157,28 @@ export default function FarmDashboard() {
                 />
               </ChartCard>
 
-              <ChartCard title="Air Quality Index" subtitle="PM2.5 levels today">
-                <LineChart
-                  data={aqiData}
-                  xAxisKey="time"
-                  lines={[{ dataKey: 'aqi', color: '#10b981', name: 'AQI' }]}
-                  height={250}
-                />
+              <ChartCard title="Air Quality Impact" subtitle="PM2.5 and AQI status">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-text-secondary">AQI Status:</span>
+                    <Badge variant={data?.aqi_impact.status === 'Good' ? 'green' : 'amber'}>
+                      {data?.aqi_impact.status || 'Good'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-text-secondary">PM2.5 Level:</span>
+                    <span className="text-lg font-bold text-white">{data?.aqi_impact.pm2_5.toFixed(1)} μg/m³</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-text-secondary">Precipitation:</span>
+                    <span className="text-lg font-bold text-white">{data?.precipitation.toFixed(1)} mm/day</span>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-border-subtle">
+                    <p className="text-xs text-text-muted">
+                      Current air quality is {data?.aqi_impact.status.toLowerCase()} for agricultural activities
+                    </p>
+                  </div>
+                </div>
               </ChartCard>
             </div>
 

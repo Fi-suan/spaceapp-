@@ -10,6 +10,10 @@ import {
   AirQualityArea,
   WildfireRiskRegion,
   ApiResponse,
+  DashboardAgricultureResponse,
+  DashboardInsuranceResponse,
+  DashboardWildfiresResponse,
+  DashboardMainResponse,
 } from './types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1'
@@ -164,6 +168,24 @@ class ApiClient {
 
   async getWildfireRiskForecast(hours: number = 48): Promise<ApiResponse<{ regions: WildfireRiskRegion[] }>> {
     return this.request(`/wildfire/risk-forecast?hours=${hours}`)
+  }
+
+  // === Dashboard Endpoints ===
+  async getDashboardAgriculture(lat: number, lon: number): Promise<DashboardAgricultureResponse> {
+    return this.request(`/dashboard/agriculture?latitude=${lat}&longitude=${lon}`)
+  }
+
+  async getDashboardInsurance(lat: number, lon: number, region?: string): Promise<DashboardInsuranceResponse> {
+    const regionParam = region ? `&region=${region}` : ''
+    return this.request(`/dashboard/insurance?latitude=${lat}&longitude=${lon}${regionParam}`)
+  }
+
+  async getDashboardWildfires(lat: number, lon: number, radiusKm: number = 200): Promise<DashboardWildfiresResponse> {
+    return this.request(`/dashboard/wildfires?latitude=${lat}&longitude=${lon}&radius_km=${radiusKm}`)
+  }
+
+  async getDashboardMain(lat: number, lon: number): Promise<DashboardMainResponse> {
+    return this.request(`/dashboard/main?latitude=${lat}&longitude=${lon}`)
   }
 }
 

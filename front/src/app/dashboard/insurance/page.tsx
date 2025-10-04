@@ -2,8 +2,41 @@
 
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { LineChart } from '@/components/charts/LineChart'
+import { useInsuranceData } from '@/hooks/useInsuranceData'
+
+const DEFAULT_LAT = 55.7558
+const DEFAULT_LON = 37.6173
+const DEFAULT_REGION = 'Moscow'
 
 export default function InsuranceDashboard() {
+  const { data, loading, error, refetch } = useInsuranceData(DEFAULT_LAT, DEFAULT_LON, DEFAULT_REGION)
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-blue mx-auto mb-4"></div>
+          <p className="text-text-muted">Loading insurance data...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-accent-red mb-4">Error: {error}</p>
+          <button
+            onClick={refetch}
+            className="bg-accent-blue px-4 py-2 rounded-lg text-white hover:bg-accent-blue/80"
+          >
+            Retry
+          </button>
+        </div>
+      </main>
+    )
+  }
   const riskData = [
     { month: 'Jan', riskScore: 45 },
     { month: 'Feb', riskScore: 52 },
@@ -49,8 +82,15 @@ export default function InsuranceDashboard() {
               </div>
               <div className="flex items-center gap-3">
                 <Badge variant="green">● Live Data</Badge>
-                <button className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80">
-                  Export Report
+                <button 
+                  onClick={refetch}
+                  disabled={loading}
+                  className="flex items-center gap-2 rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80 disabled:opacity-50"
+                >
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
                 </button>
               </div>
             </div>
@@ -59,34 +99,34 @@ export default function InsuranceDashboard() {
           <div className="mx-auto max-w-7xl space-y-10 px-6 py-10">
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
               <StatCard
-                label="Risk Level"
-                value="65/100"
+                label="Risk Assessment"
+                value={data?.risk_assessment.level || "Low"}
                 icon={metricIcons.risk}
-                trend={{ value: "Medium", direction: "neutral" }}
+                trend={{ value: `Score: ${data?.risk_assessment.score || 0}`, direction: "neutral" }}
                 iconColor="text-accent-amber"
                 iconBg="bg-accent-amber/10"
               />
               <StatCard
-                label="Total Claims"
-                value="23"
+                label="Avg Temperature"
+                value={`${data?.climate_summary.avg_temperature.toFixed(1)}°C`}
                 icon={metricIcons.claims}
-                trend={{ value: "+8%", direction: "up" }}
+                trend={{ value: `${data?.climate_summary.days_analyzed} days`, direction: "neutral" }}
                 iconColor="text-accent-purple"
                 iconBg="bg-accent-purple/10"
               />
               <StatCard
-                label="Verified"
-                value="18"
+                label="Total Precipitation"
+                value={`${data?.climate_summary.total_precipitation.toFixed(1)} mm`}
                 icon={metricIcons.verified}
-                trend={{ value: "78%", direction: "up" }}
+                trend={{ value: `${data?.climate_summary.days_analyzed} days`, direction: "neutral" }}
                 iconColor="text-accent-green"
                 iconBg="bg-accent-green/10"
               />
               <StatCard
-                label="Fraud Risk"
-                value="8%"
+                label="Weather Events"
+                value={data?.weather_verified_events.length.toString() || "0"}
                 icon={metricIcons.fraud}
-                trend={{ value: "Low", direction: "up" }}
+                trend={{ value: data?.region || "Moscow", direction: "neutral" }}
                 iconColor="text-accent-blue"
                 iconBg="bg-accent-blue/10"
               />

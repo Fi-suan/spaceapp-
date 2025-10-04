@@ -3,25 +3,26 @@
 import { useSpaceObjects } from '@/hooks/useSpaceObjects'
 
 const metricIcons = {
-  visibility: (
+  farm: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M1.5 12c2.1-4.5 6.3-7.5 10.5-7.5S20.4 7.5 22.5 12c-2.1 4.5-6.3 7.5-10.5 7.5S3.6 16.5 1.5 12Z" />
-      <circle cx="12" cy="12" r="3.5" strokeWidth="1.8" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 6v6l4 2" />
     </svg>
   ),
-  pulse: (
+  shield: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 12h3.5l2-4 4.5 8 2-4h6" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4z" />
     </svg>
   ),
-  trophy: (
+  fire: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M8 3h8v3h3.5a1.5 1.5 0 0 1 0 3h-1.5c-.7 3.5-3 5.5-5 6v2h3v2H8v-2h3v-2c-2-.5-4.3-2.5-5-6H4.5a1.5 1.5 0 0 1 0-3H8V3Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 2c-1.5 3-3 5.5-3 8.5 0 3 2 5.5 5 5.5s5-2.5 5-5.5c0-3-1.5-5.5-3-8.5-1 2-2 3.5-2 5.5 0 1.5-1 2.5-2 2.5z" />
     </svg>
   ),
-  chat: (
+  alert: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M4 6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H9l-4 4V6Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 9v4m0 4h.01" />
     </svg>
   ),
   star: (
@@ -53,13 +54,13 @@ type MetricCard = {
 
 const navigation = [
   { label: "Dashboard", active: true },
+  { label: "Agriculture", sector: "agronomy" },
+  { label: "Insurance", sector: "insurance" },
+  { label: "Wildfires", sector: "wildfire" },
   { label: "Reports" },
-  { label: "Objects" },
-  { label: "Analytics" },
-  { label: "Settings" },
 ]
 
-const insightItems = ["Intelligence", "Statistics", "Explorer"]
+const insightItems = ["Risk Analysis", "Predictions", "Alerts"]
 
 const deltaStyles = (trend: Trend) => {
   if (trend === "up") return "text-accent-green"
@@ -111,7 +112,7 @@ export default function Home() {
       <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-blue mx-auto mb-4"></div>
-          <p className="text-text-muted">Загрузка космических данных...</p>
+          <p className="text-text-muted">Loading environmental data...</p>
         </div>
       </main>
     )
@@ -121,12 +122,12 @@ export default function Home() {
     return (
       <main className="min-h-screen bg-midnight text-text-primary flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400 mb-4">Ошибка загрузки: {error}</p>
+          <p className="text-accent-red mb-4">Data loading error: {error}</p>
           <button
             onClick={refreshData}
             className="bg-accent-blue px-4 py-2 rounded-lg text-white hover:bg-accent-blue/80"
           >
-            Попробовать снова
+            Retry Connection
           </button>
         </div>
       </main>
@@ -141,40 +142,40 @@ export default function Home() {
 
   const metrics: MetricCard[] = [
     {
-      label: "Всего объектов",
-      value: totalObjects.toString(),
-      icon: "visibility",
-      delta: { value: "+100%", trend: "up" },
+      label: "Farm Risk Index",
+      value: "67",
+      icon: "farm",
+      delta: { value: "-12%", trend: "up" },
     },
     {
-      label: "Планет",
-      value: planetCount.toString(),
-      icon: "pulse",
-      delta: { value: `${Math.round((planetCount / totalObjects) * 100)}%`, trend: "up" },
+      label: "Active Claims",
+      value: "23",
+      icon: "shield",
+      delta: { value: "+8%", trend: "down" },
     },
     {
-      label: "Звезд",
-      value: starCount.toString(),
-      icon: "trophy",
-      delta: { value: `${Math.round((starCount / totalObjects) * 100)}%`, trend: "up" },
+      label: "Fire Hotspots",
+      value: "47",
+      icon: "fire",
+      delta: { value: "+15", trend: "down" },
     },
     {
-      label: "Других объектов",
-      value: otherCount.toString(),
-      icon: "chat",
-      delta: { value: `${Math.round((otherCount / totalObjects) * 100)}%`, trend: "neutral" },
+      label: "Critical Alerts",
+      value: "5",
+      icon: "alert",
+      delta: { value: "High", trend: "down" },
     },
   ]
 
   return (
     <main className="min-h-screen bg-midnight text-text-primary">
       <div className="flex min-h-screen">
-        <aside className="hidden w-72 flex-col border-r border-border-subtle bg-navy-900/80 p-6 lg:flex">
+        <aside className="hidden w-72 flex-col border-r border-border-subtle bg-midnight-deep p-6 lg:flex">
           <div className="mb-8 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-blue/10 text-accent-blue font-semibold">SA</div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-blue/10 text-accent-blue font-semibold">DP</div>
             <div>
-              <p className="text-sm text-text-subtle">Space Analytics Platform</p>
-              <p className="text-lg font-semibold text-text-primary">SpaceApp</p>
+              <p className="text-sm text-text-subtle">NASA Space Apps 2024</p>
+              <p className="text-lg font-semibold text-text-primary">Data Pathways</p>
             </div>
           </div>
 
@@ -216,31 +217,31 @@ export default function Home() {
           </nav>
 
           <div className="mt-auto rounded-2xl bg-navy-800 p-5">
-            <p className="text-sm font-semibold text-text-primary">Обновить данные</p>
-            <p className="text-xs text-text-muted">Синхронизация с API</p>
+            <p className="text-sm font-semibold text-text-primary">Sync Data</p>
+            <p className="text-xs text-text-muted">Real-time NASA & Weather APIs</p>
             <button
               onClick={refreshData}
               className="mt-4 w-full rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80"
             >
-              Обновить
+              Refresh Data
             </button>
           </div>
         </aside>
 
         <div className="flex-1 overflow-hidden">
-          <header className="border-b border-border-subtle bg-navy-900/60 backdrop-blur">
+          <header className="border-b border-border-subtle bg-navy-800/40 backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
               <div>
-                <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-                <p className="text-sm text-text-muted">Мониторинг космических объектов через API</p>
+                <h1 className="text-xl font-bold text-white">Climate & Environmental Risk Dashboard</h1>
+                <p className="text-sm text-text-secondary">Real-time monitoring for Agriculture • Insurance • Wildfire Management</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className={`rounded-lg border px-3 py-2 text-xs font-medium ${
+                <span className={`rounded-lg px-3 py-2 text-xs font-medium ${
                   error
-                    ? 'border-red-400/20 text-red-400'
-                    : 'border-green-400/20 text-green-400'
+                    ? 'bg-accent-red/10 text-accent-red'
+                    : 'bg-accent-green/10 text-accent-green'
                 }`}>
-                  {error ? 'API Недоступен' : 'API Подключен'}
+                  {error ? '● Offline' : '● Live Data'}
                 </span>
                 <button
                   onClick={refreshData}
@@ -249,7 +250,7 @@ export default function Home() {
                   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" className="h-4 w-4">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.6" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  Обновить данные
+                  Export Report
                 </button>
               </div>
             </div>
@@ -257,66 +258,123 @@ export default function Home() {
 
           <div className="mx-auto max-w-7xl space-y-10 px-6 py-10">
             <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-              {metrics.map((metric) => (
-                <div key={metric.label} className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
-                  <div className="mb-6 flex items-center justify-between text-text-subtle">
-                    <span className="text-sm font-medium">{metric.label}</span>
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-accent-blue">
-                      {metricIcons[metric.icon]}
+              {metrics.map((metric, idx) => {
+                const iconColors = ['text-accent-green', 'text-accent-purple', 'text-accent-orange', 'text-accent-amber']
+                const bgColors = ['bg-accent-green/10', 'bg-accent-purple/10', 'bg-accent-orange/10', 'bg-accent-amber/10']
+                return (
+                  <div key={metric.label} className="rounded-2xl bg-navy-800/60 p-6 shadow-card border border-border-subtle">
+                    <div className="mb-6 flex items-center justify-between text-text-subtle">
+                      <span className="text-sm font-medium text-text-secondary">{metric.label}</span>
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${bgColors[idx]} ${iconColors[idx]}`}>
+                        {metricIcons[metric.icon]}
+                      </div>
+                    </div>
+                    <div className="flex items-end justify-between">
+                      <p className="text-3xl font-bold text-white">{metric.value}</p>
+                      <TrendDelta delta={metric.delta} />
                     </div>
                   </div>
-                  <div className="flex items-end justify-between">
-                    <p className="text-3xl font-semibold text-white">{metric.value}</p>
-                    <TrendDelta delta={metric.delta} />
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </section>
 
-            <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
-              <div className="mb-6 flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg text-white">Космические объекты</h2>
-                  <p className="text-sm text-text-muted">Список всех объектов из базы данных</p>
+            <div className="grid gap-6 lg:grid-cols-3">
+              <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green">
+                      {metricIcons.farm}
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-white">Agriculture</h2>
+                      <p className="text-xs text-text-subtle">Farm Risk Monitoring</p>
+                    </div>
+                  </div>
+                  <span className="rounded-lg bg-accent-green/10 px-2 py-1 text-xs font-medium text-accent-green">Active</span>
                 </div>
-                <button
-                  onClick={refreshData}
-                  className="rounded-lg border border-white/10 px-3 py-1 text-xs text-text-muted hover:border-white/20"
-                >
-                  Обновить
+                <div className="space-y-3">
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Current Temperature</p>
+                    <p className="text-lg font-semibold text-white">28°C <span className="text-xs text-accent-green">↑ +3°</span></p>
+                  </div>
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Frost Risk (24h)</p>
+                    <p className="text-lg font-semibold text-white">12% <span className="text-xs text-text-subtle">Low</span></p>
+                  </div>
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">AQI Impact</p>
+                    <p className="text-lg font-semibold text-white">Moderate <span className="text-xs text-accent-amber">PM2.5: 45</span></p>
+                  </div>
+                </div>
+                <button className="mt-4 w-full rounded-lg bg-navy-600 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-navy-500">
+                  View Details →
                 </button>
-              </div>
+              </section>
 
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                {spaceObjects.map((obj) => (
-                  <div key={obj.id} className="flex flex-col gap-3 rounded-xl border border-white/5 bg-navy-900/40 p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-accent-blue">
-                        {getObjectIcon(obj.type)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-white">{obj.name}</p>
-                        <p className="text-xs text-text-muted capitalize">{obj.type}</p>
-                      </div>
+              <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-purple/10 text-accent-purple">
+                      {metricIcons.shield}
                     </div>
-                    {obj.description && (
-                      <p className="text-xs text-text-subtle">{obj.description}</p>
-                    )}
-                    {obj.distance_from_earth !== undefined && (
-                      <p className="text-xs text-text-muted">
-                        Расстояние: {obj.distance_from_earth} св. лет
-                      </p>
-                    )}
+                    <div>
+                      <h2 className="text-base font-bold text-white">Insurance</h2>
+                      <p className="text-xs text-text-subtle">Claims Verification</p>
+                    </div>
                   </div>
-                ))}
-              </div>
-
-              {spaceObjects.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-text-muted">Нет данных о космических объектах</p>
+                  <span className="rounded-lg bg-accent-amber/10 px-2 py-1 text-xs font-medium text-accent-amber">23 Claims</span>
                 </div>
-              )}
-            </section>
+                <div className="space-y-3">
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Verified Claims</p>
+                    <p className="text-lg font-semibold text-white">18 <span className="text-xs text-accent-green">✓ NASA Data</span></p>
+                  </div>
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Pending Review</p>
+                    <p className="text-lg font-semibold text-white">5 <span className="text-xs text-text-subtle">Manual Check</span></p>
+                  </div>
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Fraud Risk</p>
+                    <p className="text-lg font-semibold text-white">Low <span className="text-xs text-accent-green">8% avg</span></p>
+                  </div>
+                </div>
+                <button className="mt-4 w-full rounded-lg bg-navy-600 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-navy-500">
+                  Generate Report →
+                </button>
+              </section>
+
+              <section className="rounded-2xl bg-navy-800/60 p-6 shadow-card">
+                <div className="mb-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-orange/10 text-accent-orange">
+                      {metricIcons.fire}
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-white">Wildfires</h2>
+                      <p className="text-xs text-text-subtle">Real-time Monitoring</p>
+                    </div>
+                  </div>
+                  <span className="rounded-lg bg-accent-red/10 px-2 py-1 text-xs font-medium text-accent-red">47 Active</span>
+                </div>
+                <div className="space-y-3">
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Fire Danger Index</p>
+                    <p className="text-lg font-semibold text-white">92/100 <span className="text-xs text-accent-red">Critical</span></p>
+                  </div>
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">Wind Speed</p>
+                    <p className="text-lg font-semibold text-white">25 km/h <span className="text-xs text-accent-amber">→ NE</span></p>
+                  </div>
+                  <div className="rounded-lg bg-navy-900/60 p-3">
+                    <p className="text-xs text-text-muted">AQI (Smoke)</p>
+                    <p className="text-lg font-semibold text-white">201 <span className="text-xs text-accent-red">Hazardous</span></p>
+                  </div>
+                </div>
+                <button className="mt-4 w-full rounded-lg bg-navy-600 px-3 py-2 text-xs font-medium text-text-secondary hover:bg-navy-500">
+                  View Hotspots →
+                </button>
+              </section>
+            </div>
           </div>
         </div>
       </div>

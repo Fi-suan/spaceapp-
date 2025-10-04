@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SpaceApp - Космический дашборд',
-  description: 'Мониторинг космических объектов через REST API',
+  title: 'Data Pathways - NASA Space Apps 2024',
+  description: 'Climate & Environmental Risk Platform for Agriculture, Insurance & Wildfire Management',
 }
 
 export default function RootLayout({
@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="ru">
+    <html lang="en">
       <body>{children}</body>
     </html>
   )

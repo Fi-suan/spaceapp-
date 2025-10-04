@@ -9,8 +9,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #050b1a;
-  color: #f8fbff;
+  background-color: #0B1220;
+  color: #FFFFFF;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 14px;
   line-height: 1.6;
@@ -21,13 +21,18 @@ main {
 }
 
 /* Fallback styles if Tailwind fails to load */
-.bg-midnight { background-color: #050b1a !important; }
-.bg-navy-900 { background-color: #0b1424 !important; }
-.bg-navy-800 { background-color: #101c33 !important; }
+.bg-midnight { background-color: #0B1220 !important; }
+.bg-midnight-deep { background-color: #050B1A !important; }
+.bg-navy-900 { background-color: #0B1220 !important; }
+.bg-navy-800 { background-color: #101C33 !important; }
+.bg-navy-700 { background-color: #152741 !important; }
 .text-white { color: #ffffff !important; }
-.text-text-primary { color: #f8fbff !important; }
-.text-text-muted { color: #a8b3c9 !important; }
-.text-text-subtle { color: #7b88a8 !important; }
-.text-accent-blue { color: #4f8cff !important; }
-.text-accent-green { color: #22c55e !important; }
+.text-text-primary { color: #FFFFFF !important; }
+.text-text-secondary { color: #D0D6E5 !important; }
+.text-text-muted { color: #A8B3C9 !important; }
+.text-text-subtle { color: #7B88A8 !important; }
+.text-accent-blue { color: #4F8CFF !important; }
+.text-accent-green { color: #22C55E !important; }
+.text-accent-purple { color: #8F7BFF !important; }
+.text-accent-amber { color: #FACC15 !important; }
 .border-border-subtle { border-color: rgba(255, 255, 255, 0.05) !important; }

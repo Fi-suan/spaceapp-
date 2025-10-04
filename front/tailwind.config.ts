@@ -9,25 +9,32 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        midnight: "#050b1a",
+        midnight: "#0B1220",
+        "midnight-deep": "#050B1A",
         navy: {
-          900: "#0b1424",
-          800: "#101c33",
+          900: "#0B1220",
+          800: "#101C33",
           700: "#152741",
+          600: "#19253B",
+          500: "#1A2538",
         },
         accent: {
-          blue: "#4f8cff",
-          green: "#22c55e",
-          amber: "#f97316",
-          red: "#f87171",
+          blue: "#4F8CFF",
+          green: "#22C55E",
+          purple: "#8F7BFF",
+          amber: "#FACC15",
+          orange: "#F97316",
+          red: "#F87171",
         },
         text: {
-          primary: "#f8fbff",
-          muted: "#a8b3c9",
-          subtle: "#7b88a8",
+          primary: "#FFFFFF",
+          secondary: "#D0D6E5",
+          muted: "#A8B3C9",
+          subtle: "#7B88A8",
         },
         border: {
           subtle: "rgba(255, 255, 255, 0.05)",
+          muted: "rgba(168, 179, 201, 0.15)",
         },
       },
       fontFamily: {

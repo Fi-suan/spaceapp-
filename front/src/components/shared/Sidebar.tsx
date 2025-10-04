@@ -46,10 +46,10 @@ interface SidebarProps {
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeRoute }) => {
   const navigation = [
-    { label: 'Dashboard', href: '/', key: 'dashboard', icon: navIcons.dashboard },
-    { label: 'Agriculture', href: '/dashboard/farm', key: 'farm', icon: navIcons.farm },
-    { label: 'Insurance', href: '/dashboard/insurance', key: 'insurance', icon: navIcons.insurance },
-    { label: 'Wildfires', href: '/dashboard/wildfire', key: 'wildfire', icon: navIcons.wildfire },
+    { label: 'Dashboard', href: '/', key: 'dashboard', icon: navIcons.dashboard, color: 'blue' },
+    { label: 'Agriculture', href: '/dashboard/farm', key: 'farm', icon: navIcons.farm, color: 'green' },
+    { label: 'Insurance', href: '/dashboard/insurance', key: 'insurance', icon: navIcons.insurance, color: 'purple' },
+    { label: 'Wildfires', href: '/dashboard/wildfire', key: 'wildfire', icon: navIcons.wildfire, color: 'orange' },
   ]
 
   const insightItems = [
@@ -74,17 +74,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute }) => {
         <div className="flex flex-col gap-1">
           {navigation.map((item) => {
             const isActive = item.key === activeRoute
+            const colorClasses = {
+              blue: { bg: 'bg-accent-blue/10', text: 'text-accent-blue' },
+              green: { bg: 'bg-accent-green/10', text: 'text-accent-green' },
+              purple: { bg: 'bg-accent-purple/10', text: 'text-accent-purple' },
+              orange: { bg: 'bg-accent-orange/10', text: 'text-accent-orange' },
+            }
+            const activeColors = colorClasses[item.color as keyof typeof colorClasses]
+            
             return (
               <Link
                 key={item.key}
                 href={item.href}
                 className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors ${
                   isActive
-                    ? 'bg-accent-blue/10 text-accent-blue'
+                    ? `${activeColors.bg} ${activeColors.text}`
                     : 'text-text-subtle hover:bg-white/5 hover:text-text-primary'
                 }`}
               >
-                <span className={isActive ? 'text-accent-blue' : 'text-text-subtle'}>
+                <span className={isActive ? activeColors.text : 'text-text-subtle'}>
                   {item.icon}
                 </span>
                 {item.label}

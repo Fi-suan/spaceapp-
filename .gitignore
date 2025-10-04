@@ -5,6 +5,7 @@
 /front/node_modules
 /.next
 /.pnp
+.next/
 .pnp.js
 
 # testing

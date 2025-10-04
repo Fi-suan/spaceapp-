@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     port: int = 8080
     debug: bool = True
 
+    # API ключи для хакатона
+    firms_api_key: str = "7e4b7699d09603e9dc1c35257474ef8a"
+    openweather_api_key: str = "3cb51132b357bb5dabdcfe87f5ff9d9e"
+
     class Config:
         env_file = ".env"
 

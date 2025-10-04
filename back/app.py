@@ -4,6 +4,7 @@ import uvicorn
 
 from app.core.config import settings
 from app.api.space_objects import router as space_objects_router
+from app.api.dashboard_sections import router as dashboard_router
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -25,6 +26,7 @@ def create_app() -> FastAPI:
 
     # Подключение роутеров
     app.include_router(space_objects_router, prefix="/api/v1")
+    app.include_router(dashboard_router, prefix="/api/v1")
 
     @app.get("/")
     async def root():

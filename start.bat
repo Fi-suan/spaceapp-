@@ -2,11 +2,21 @@
 echo Запуск SpaceApp...
 echo.
 
-echo Установка зависимостей...
+echo Проверка зависимостей...
 cd back
-pip install fastapi uvicorn pydantic-settings
+if not exist "venv" (
+    echo Установка зависимостей бэкенда...
+    pip install fastapi uvicorn pydantic-settings
+) else (
+    echo Зависимости бэкенда уже установлены
+)
 cd ../front
-call npm install
+if not exist "node_modules" (
+    echo Установка зависимостей фронтенда...
+    call npm install
+) else (
+    echo Зависимости фронтенда уже установлены
+)
 cd ..
 
 echo.

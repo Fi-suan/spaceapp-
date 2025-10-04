@@ -1,15 +1,16 @@
 'use client'
 
+import { useState } from 'react'
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { BarChart } from '@/components/charts/BarChart'
 import { useWildfiresData } from '@/hooks/useWildfiresData'
+import { City, DEFAULT_CITY } from '@/lib/cities'
 
-const DEFAULT_LAT = 55.7558
-const DEFAULT_LON = 37.6173
 const DEFAULT_RADIUS = 200
 
 export default function WildfireDashboard() {
-  const { data, loading, error, refetch } = useWildfiresData(DEFAULT_LAT, DEFAULT_LON, DEFAULT_RADIUS)
+  const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY)
+  const { data, loading, error, refetch } = useWildfiresData(selectedCity.latitude, selectedCity.longitude, DEFAULT_RADIUS)
 
   if (loading) {
     return (
@@ -70,9 +71,9 @@ export default function WildfireDashboard() {
   return (
     <main className="min-h-screen bg-midnight text-text-primary">
       <div className="flex min-h-screen">
-        <Sidebar activeRoute="wildfire" />
+        <Sidebar activeRoute="wildfire" selectedCity={selectedCity} onCityChange={setSelectedCity} />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="ml-0 flex-1 overflow-hidden lg:ml-72">
           <header className="border-b border-border-subtle bg-navy-800/40 backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
               <div>

@@ -6,9 +6,57 @@
   - Local:        http://localhost:3000
 
  ✓ Starting...
- ✓ Ready in 3.8s
+ ✓ Ready in 3.6s
  ○ Compiling / ...
- ✓ Compiled / in 11.8s (1774 modules)
- GET / 200 in 12462ms
- ✓ Compiled in 1069ms (896 modules)
- GET / 200 in 47ms
+ ✓ Compiled / in 10.7s (1776 modules)
+ GET / 200 in 11284ms
+ GET / 200 in 8225ms
+ ✓ Compiled in 910ms (897 modules)
+(node:120238) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET / 200 in 52ms
+ GET / 200 in 29ms
+ ○ Compiling /dashboard/farm ...
+ ✓ Compiled /dashboard/farm in 1066ms (1772 modules)
+ ○ Compiling /dashboard/wildfire ...
+ ✓ Compiled /dashboard/wildfire in 1557ms (1808 modules)
+ ✓ Compiled in 1629ms (1822 modules)
+ ✓ Compiled in 2.2s (1822 modules)
+ ✓ Compiled in 1047ms (1822 modules)
+ ✓ Compiled in 453ms (918 modules)
+ ✓ Compiled in 924ms (1822 modules)
+ ✓ Compiled in 984ms (1822 modules)
+ ✓ Compiled in 681ms (1822 modules)
+ ✓ Compiled in 650ms (1822 modules)
+ ✓ Compiled in 949ms (1824 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET / 200 in 471ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 1585ms (1824 modules)
+ ⨯ src/app/page.tsx (122:111) @ DEFAULT_LAT
+ ⨯ ReferenceError: DEFAULT_LAT is not defined
+    at Home (./src/app/page.tsx:305:170)
+digest: "2487117841"
+[0m [90m 120 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mHome[39m() {[0m
+[0m [90m 121 |[39m   [36mconst[39m { spaceObjects[33m,[39m loading[33m:[39m spaceLoading[33m,[39m error[33m:[39m spaceError[33m,[39m getTypeStats[33m,[39m totalCount[33m,[39m refreshData } [33m=[39m useSpaceObjects()[0m
+[0m[31m[1m>[22m[39m[90m 122 |[39m   [36mconst[39m { data[33m:[39m dashboardData[33m,[39m loading[33m:[39m dashboardLoading[33m,[39m error[33m:[39m dashboardError[33m,[39m refetch } [33m=[39m useMainDashboard([33mDEFAULT_LAT[39m[33m,[39m [33mDEFAULT_LON[39m)[0m
+[0m [90m     |[39m                                                                                                               [31m[1m^[22m[39m[0m
+[0m [90m 123 |[39m[0m
+[0m [90m 124 |[39m   [36mconst[39m loading [33m=[39m spaceLoading [33m||[39m dashboardLoading[0m
+[0m [90m 125 |[39m   [36mconst[39m error [33m=[39m spaceError [33m||[39m dashboardError[0m
+ GET / 500 in 1651ms
+ ✓ Compiled in 821ms (1824 modules)
+ GET / 200 in 89ms
+ ✓ Compiled in 710ms (1824 modules)
+ ✓ Compiled in 1067ms (1824 modules)
+ ✓ Compiled in 682ms (1824 modules)
+ ✓ Compiled in 732ms (1824 modules)
+ ✓ Compiled in 256ms (919 modules)
+ ✓ Compiled in 240ms (919 modules)
+ ✓ Compiled in 861ms (1824 modules)
+ ✓ Compiled in 578ms (1824 modules)
+ ✓ Compiled in 762ms (1824 modules)
+ ✓ Compiled in 672ms (1824 modules)
+ ✓ Compiled in 1200ms (1855 modules)
+ ○ Compiling /dashboard/insurance ...
+ ✓ Compiled /dashboard/insurance in 2.2s (1849 modules)

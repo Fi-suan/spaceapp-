@@ -1,12 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { useSpaceObjects } from '@/hooks/useSpaceObjects'
 import { useMainDashboard } from '@/hooks/useMainDashboard'
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { LineChart } from '@/components/charts/LineChart'
-
-const DEFAULT_LAT = 55.7558
-const DEFAULT_LON = 37.6173
+import { City, DEFAULT_CITY } from '@/lib/cities'
 
 const metricIcons = {
   farm: (
@@ -119,8 +118,9 @@ const getObjectIcon = (type: string) => {
 }
 
 export default function Home() {
+  const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY)
   const { spaceObjects, loading: spaceLoading, error: spaceError, getTypeStats, totalCount, refreshData } = useSpaceObjects()
-  const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useMainDashboard(DEFAULT_LAT, DEFAULT_LON)
+  const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useMainDashboard(selectedCity.latitude, selectedCity.longitude)
 
   const loading = spaceLoading || dashboardLoading
   const error = spaceError || dashboardError
@@ -203,9 +203,9 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-midnight text-text-primary">
       <div className="flex min-h-screen">
-        <Sidebar activeRoute="dashboard" />
+        <Sidebar activeRoute="dashboard" selectedCity={selectedCity} onCityChange={setSelectedCity} />
 
-        <div className="flex-1 overflow-hidden">
+        <div className="ml-0 flex-1 overflow-hidden lg:ml-72">
           <header className="border-b border-border-subtle bg-navy-800/40 backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
               <div>

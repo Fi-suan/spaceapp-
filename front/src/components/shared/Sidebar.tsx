@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { City, KAZAKHSTAN_CITIES } from '@/lib/cities'
 
 const navIcons = {
   dashboard: (
@@ -42,9 +44,12 @@ const navIcons = {
 
 interface SidebarProps {
   activeRoute: 'dashboard' | 'farm' | 'insurance' | 'wildfire'
+  selectedCity: City
+  onCityChange: (city: City) => void
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeRoute }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, selectedCity, onCityChange }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const navigation = [
     { label: 'Dashboard', href: '/', key: 'dashboard', icon: navIcons.dashboard, color: 'blue' },
     { label: 'Agriculture', href: '/dashboard/farm', key: 'farm', icon: navIcons.farm, color: 'green' },
@@ -59,15 +64,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute }) => {
   ]
 
   return (
-    <aside className="hidden w-72 flex-col border-r border-border-subtle bg-midnight-deep p-6 lg:flex">
-      <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-blue/10 text-accent-blue font-semibold text-lg">
-          DP
-        </div>
-        <div>
-          <p className="text-sm text-text-subtle">NASA Space Apps 2024</p>
-          <p className="text-lg font-semibold text-text-primary">Data Pathways</p>
-        </div>
+    <aside className="fixed left-0 top-0 hidden h-screen w-72 flex-col overflow-y-auto border-r border-border-subtle bg-midnight-deep p-6 lg:flex">
+      <div className="mb-8">
+        <Image 
+          src="/images/logo.png" 
+          alt="EcoLitas Logo" 
+          width={240}
+          height={60}
+          className="w-full h-auto"
+          priority
+        />
+        <p className="text-xs text-text-subtle mt-2 text-center">NASA Space Apps 2024</p>
       </div>
 
       <nav className="flex flex-1 flex-col gap-8">
@@ -120,12 +127,45 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute }) => {
         </div>
       </nav>
 
-      <div className="mt-auto rounded-2xl bg-navy-800 p-5">
-        <p className="text-sm font-semibold text-text-primary">Location</p>
-        <p className="text-xs text-text-muted">Krasnoyarsk Region, Russia</p>
-        <button className="mt-4 w-full rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80">
-          Change Location
-        </button>
+      <div className="relative mt-auto rounded-2xl bg-navy-800 p-5">
+        <p className="text-sm font-semibold text-text-primary mb-2">Location</p>
+        <p className="text-xs text-text-muted mb-3">{selectedCity.nameEn}, {selectedCity.country}</p>
+        <div className="relative">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full flex items-center justify-between rounded-lg bg-accent-blue px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-blue/80"
+          >
+            <span>Change Location</span>
+            <svg
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              className={`h-4 w-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`}
+            >
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+          {isDropdownOpen && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg bg-navy-900 border border-border-subtle shadow-xl overflow-hidden">
+              {KAZAKHSTAN_CITIES.map((city) => (
+                <button
+                  key={city.id}
+                  onClick={() => {
+                    onCityChange(city)
+                    setIsDropdownOpen(false)
+                  }}
+                  className={`w-full px-4 py-3 text-left text-sm transition-colors ${
+                    city.id === selectedCity.id
+                      ? 'bg-accent-blue/20 text-accent-blue font-medium'
+                      : 'text-text-primary hover:bg-navy-700'
+                  }`}
+                >
+                  <div className="font-medium">{city.nameEn}</div>
+                  <div className="text-xs text-text-muted">{city.name}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   )

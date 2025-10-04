@@ -16,20 +16,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/farm/page.js"
     ],
-    "/dashboard/insurance/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/insurance/page.js"
-    ],
     "/dashboard/wildfire/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/wildfire/page.js"
     ],
-    "/_not-found/page": [
+    "/dashboard/insurance/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/_not-found/page.js"
+      "static/chunks/app/dashboard/insurance/page.js"
     ]
   }
 }

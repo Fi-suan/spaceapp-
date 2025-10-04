@@ -1,0 +1,14 @@
+
+> spaceapp-frontend@0.1.0 dev
+> next dev --port 3000
+
+  ▲ Next.js 14.2.33
+  - Local:        http://localhost:3000
+
+ ✓ Starting...
+ ✓ Ready in 3.8s
+ ○ Compiling / ...
+ ✓ Compiled / in 11.8s (1774 modules)
+ GET / 200 in 12462ms
+ ✓ Compiled in 1069ms (896 modules)
+ GET / 200 in 47ms

@@ -1,0 +1,27 @@
+{
+  "name": "spaceapp",
+  "version": "1.0.0",
+  "description": "SpaceApp - Full-stack космическое приложение с FastAPI бэкендом и Next.js фронтендом",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd back && python app.py",
+    "dev:frontend": "cd front && npm run dev",
+    "install:all": "cd back && pip install -r requirements.txt && cd ../front && npm install",
+    "build": "cd front && npm run build",
+    "start": "concurrently \"npm run dev:backend\" \"cd front && npm start\"",
+    "backend": "cd back && python app.py",
+    "frontend": "cd front && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "space",
+    "api",
+    "fastapi",
+    "nextjs",
+    "dashboard"
+  ],
+  "author": "SpaceApp Team",
+  "license": "MIT"
+}

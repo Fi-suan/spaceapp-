@@ -20,8 +20,8 @@ services:
     name: spaceapp-frontend
     runtime: node
     plan: free
-    buildCommand: cd front && npm install && npm run build
-    startCommand: cd front && node .next/standalone/server.js
+    buildCommand: cd front && npm install && NEXT_PUBLIC_API_URL=https://spaceapp-backend.onrender.com/api/v1 npm run build
+    startCommand: cd front && NEXT_PUBLIC_API_URL=https://spaceapp-backend.onrender.com/api/v1 PORT=3000 node .next/standalone/server.js
     envVars:
       - key: NEXT_PUBLIC_API_URL
         value: https://spaceapp-backend.onrender.com/api/v1

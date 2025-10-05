@@ -37,7 +37,7 @@ class AIAdvisor:
 
             # Системный промпт
             system_prompt = """You are an expert agricultural advisor and meteorologist.
-Your task is to analyze weather conditions and provide actionable recommendations and risk alerts for farmers.
+Your task is to analyze weather conditions and provide actionable recommendations, risk alerts, and interesting weather facts for farmers.
 
 You MUST respond ONLY with a valid JSON object in this exact format:
 {
@@ -55,6 +55,11 @@ You MUST respond ONLY with a valid JSON object in this exact format:
       "level": "warning",
       "message": "alert message"
     }
+  ],
+  "weather_facts": [
+    "interesting fact about current conditions 1",
+    "interesting fact about current conditions 2",
+    "interesting fact about current conditions 3"
   ]
 }
 
@@ -62,8 +67,16 @@ Rules:
 - Provide 3-5 specific, actionable recommendations based on current weather
 - Include 1-3 risk alerts if there are weather hazards
 - Risk alert levels: "critical", "warning", "info"
-- Focus on frost risks, precipitation, air quality (PM2.5), wind, and temperature extremes
-- Be concise and practical
+- Focus on frost risks, precipitation, air quality (PM2.5, CO, NO2, O3, SO2), wind, and temperature extremes
+- Analyze air pollutants: CO (safe <4000), NO2 (safe <40), O3 (safe <100), SO2 (safe <20) in µg/m³
+- Provide 3-4 practical and interesting facts for farmers about current conditions
+- Weather facts should be farmer-friendly tips, observations, or useful information about:
+  * How current conditions affect specific crops
+  * Best timing for farming activities based on weather
+  * Impact on soil, pests, or plant growth
+  * Simple ways to optimize farming in these conditions
+- Make facts practical, engaging, and directly useful for farming decisions
+- Be concise and down-to-earth
 - Respond ONLY with the JSON object, no additional text"""
 
             # Запрос к OpenAI
@@ -88,7 +101,8 @@ Rules:
 
             return {
                 "recommendations": parsed_data.get("recommendations", []),
-                "risk_alerts": parsed_data.get("risk_alerts", [])
+                "risk_alerts": parsed_data.get("risk_alerts", []),
+                "weather_facts": parsed_data.get("weather_facts", [])
             }
 
         except json.JSONDecodeError as e:
@@ -107,6 +121,7 @@ Rules:
         temp = weather_data.get("current_temperature", 0)
         frost_risk = weather_data.get("frost_risk", {})
         aqi = weather_data.get("aqi_impact", {})
+        air_components = weather_data.get("air_quality_components", {})
         humidity = weather_data.get("humidity", 0)
         precipitation = weather_data.get("precipitation", 0)
         wind_speed = weather_data.get("wind_speed", 0)
@@ -121,12 +136,18 @@ Humidity: {humidity}%
 Precipitation: {precipitation} mm/day
 Wind Speed: {wind_speed} m/s
 
+Air Quality Components:
+- Carbon Monoxide (CO): {air_components.get('co', 0)} µg/m³
+- Nitrogen Dioxide (NO2): {air_components.get('no2', 0)} µg/m³
+- Ozone (O3): {air_components.get('o3', 0)} µg/m³
+- Sulphur Dioxide (SO2): {air_components.get('so2', 0)} µg/m³
+
 7-Day Forecast:"""
 
         for day in forecast[:7]:
             context += f"\n- {day.get('date')}: {day.get('tempMin')}°C to {day.get('tempMax')}°C, Precip: {day.get('precipitation')} mm"
 
-        context += "\n\nBased on these conditions, provide agricultural recommendations and risk alerts."
+        context += "\n\nBased on these conditions, provide agricultural recommendations, risk alerts, and interesting weather facts."
 
         return context
 
@@ -178,9 +199,34 @@ Wind Speed: {wind_speed} m/s
                 "message": "No significant weather risks detected at this time"
             })
 
+        # Weather facts fallback - practical tips for farmers
+        humidity = weather_data.get('humidity', 0)
+        weather_facts = []
+
+        if temp < 5:
+            weather_facts.append(f"Cold weather ({temp}°C) slows plant growth - consider using row covers for sensitive crops")
+        elif temp > 25:
+            weather_facts.append(f"Warm temperatures ({temp}°C) speed up evaporation - increase watering frequency by 20-30%")
+        else:
+            weather_facts.append(f"Current temperature ({temp}°C) is optimal for most crop growth and field work")
+
+        if humidity > 70:
+            weather_facts.append(f"High humidity ({humidity}%) creates favorable conditions for fungal diseases - check crops regularly")
+        elif humidity < 40:
+            weather_facts.append(f"Low humidity ({humidity}%) increases water stress - monitor soil moisture closely")
+
+        if aqi.get("pm2_5", 0) > 35:
+            weather_facts.append("Poor air quality may reduce photosynthesis efficiency - ensure adequate irrigation")
+        else:
+            weather_facts.append("Good air quality supports healthy plant growth and efficient photosynthesis")
+
+        if len(weather_facts) < 3:
+            weather_facts.append("Monitor daily forecasts to plan irrigation and field work efficiently")
+
         return {
             "recommendations": recommendations,
-            "risk_alerts": risk_alerts
+            "risk_alerts": risk_alerts,
+            "weather_facts": weather_facts
         }
 
 
@@ -205,7 +251,7 @@ Wind Speed: {wind_speed} m/s
 
             # Системный промпт для страховых рисков
             system_prompt = """You are an expert insurance analyst and climate risk assessor.
-Your task is to analyze climate and weather data to identify insurance risks and verify claims.
+Your task is to analyze climate and weather data to identify insurance risks, verify claims, and provide insights.
 
 You MUST respond ONLY with a valid JSON object in this exact format:
 {
@@ -230,16 +276,28 @@ You MUST respond ONLY with a valid JSON object in this exact format:
       "evidence": ["Evidence point 1", "Evidence point 2"],
       "fraud_probability": "8%"
     }
+  ],
+  "insurance_insights": [
+    "interesting insurance fact 1",
+    "interesting insurance fact 2",
+    "interesting insurance fact 3"
   ]
 }
 
 Rules:
 - Provide 3-5 climate risks based on weather events
 - Generate 1-2 realistic verified insurance claims based on the data
+- Provide 3-4 practical insurance insights about current risks
+- Insurance insights should be useful information about:
+  * How current weather affects insurance premiums or coverage
+  * Historical claim patterns in similar conditions
+  * Risk mitigation strategies for property owners
+  * Impact of climate trends on insurance costs
 - Severity levels: "low", "medium", "high", "critical"
 - Status: "verified", "pending", "rejected"
 - Focus on extreme weather events: frost, drought, floods, storms, fires
 - Be specific with numbers and evidence
+- Make insights practical and informative for insurance holders
 - Respond ONLY with the JSON object, no additional text"""
 
             # Запрос к OpenAI
@@ -264,7 +322,8 @@ Rules:
 
             return {
                 "climate_risks": parsed_data.get("climate_risks", []),
-                "verified_claims": parsed_data.get("verified_claims", [])
+                "verified_claims": parsed_data.get("verified_claims", []),
+                "insurance_insights": parsed_data.get("insurance_insights", [])
             }
 
         except json.JSONDecodeError as e:
@@ -364,9 +423,27 @@ Extreme Weather Events Detected:"""
                 "fraud_probability": "12%"
             })
 
+        # Insurance insights fallback
+        insurance_insights = []
+
+        if precip_count > 0:
+            insurance_insights.append(f"Heavy precipitation events increase flood insurance claims by 40-60% on average")
+
+        if frost_count > 0:
+            insurance_insights.append(f"Frost damage claims typically spike within 48 hours of cold events - document damage promptly")
+
+        if len(climate_risks) > 2:
+            insurance_insights.append("Multiple weather risks detected - consider comprehensive property insurance coverage")
+        else:
+            insurance_insights.append("Current conditions are relatively stable - good time to review insurance policy terms")
+
+        if len(insurance_insights) < 3:
+            insurance_insights.append("Climate-related insurance claims have increased 30% globally over the past decade")
+
         return {
             "climate_risks": climate_risks if climate_risks else [{"type": "No Risks", "count": "0", "severity": "low"}],
-            "verified_claims": verified_claims if verified_claims else []
+            "verified_claims": verified_claims if verified_claims else [],
+            "insurance_insights": insurance_insights
         }
 
 

@@ -212,6 +212,44 @@ export default function InsuranceDashboard() {
                 )}
               </div>
             </ChartCard>
+
+            <ChartCard
+              title="Insurance Insights"
+              subtitle="AI-generated insights about climate risks and coverage (Powered by GPT)"
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            >
+              <div className="space-y-3">
+                {data?.insurance_insights && data.insurance_insights.length > 0 ? (
+                  data.insurance_insights.map((insight: string, index: number) => (
+                    <div key={index} className="rounded-xl bg-navy-900 p-4 border border-accent-cyan/20">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-cyan/20 flex-shrink-0 mt-0.5">
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-accent-cyan">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                          </svg>
+                        </div>
+                        <p className="text-sm text-text-primary">{insight}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl bg-navy-900 p-4 border border-accent-cyan/20">
+                    <div className="flex items-center gap-2">
+                      <span className="text-accent-cyan">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                      <p className="text-sm text-text-muted">Loading insurance insights...</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </ChartCard>
           </div>
         </div>
       </div>

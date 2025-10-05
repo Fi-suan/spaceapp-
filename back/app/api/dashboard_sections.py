@@ -91,6 +91,12 @@ async def get_agriculture_data(
     aqi_components = aqi_list[0].get("components", {}) if aqi_list else {}
     pm2_5 = aqi_components.get("pm2_5", 0)
 
+    # Дополнительные компоненты воздуха
+    co = aqi_components.get("co", 0)  # Carbon monoxide (μg/m³)
+    no2 = aqi_components.get("no2", 0)  # Nitrogen dioxide (μg/m³)
+    o3 = aqi_components.get("o3", 0)  # Ozone (μg/m³)
+    so2 = aqi_components.get("so2", 0)  # Sulphur dioxide (μg/m³)
+
     # Определяем статус AQI
     if pm2_5 <= 12:
         aqi_status = "Good"
@@ -232,6 +238,12 @@ async def get_agriculture_data(
             "pm2_5": round(pm2_5, 1),
             "status": aqi_status
         },
+        "air_quality_components": {
+            "co": round(co, 2),
+            "no2": round(no2, 2),
+            "o3": round(o3, 2),
+            "so2": round(so2, 2)
+        },
         "humidity": round(humidity, 1),
         "precipitation": round(precipitation, 2),
         "wind_speed": round(wind_speed, 2),
@@ -263,12 +275,19 @@ async def get_agriculture_data(
             "pm2_5": round(pm2_5, 1),
             "status": aqi_status
         },
+        "air_quality_components": {
+            "co": round(co, 2),  # Carbon monoxide
+            "no2": round(no2, 2),  # Nitrogen dioxide
+            "o3": round(o3, 2),  # Ozone
+            "so2": round(so2, 2)  # Sulphur dioxide
+        },
         "humidity": round(humidity, 1),
         "precipitation": round(precipitation, 2),
         "wind_speed": round(wind_speed, 2),
         "forecast_7day": forecast_data,
         "recommendations": ai_insights.get("recommendations", []),
         "risk_alerts": ai_insights.get("risk_alerts", []),
+        "weather_facts": ai_insights.get("weather_facts", []),
         "location": {
             "latitude": latitude,
             "longitude": longitude
@@ -538,6 +557,7 @@ async def get_insurance_data(
         "risk_trends": risk_trends,
         "climate_risks": ai_insights.get("climate_risks", []),
         "verified_claims": ai_insights.get("verified_claims", []),
+        "insurance_insights": ai_insights.get("insurance_insights", []),
         "region": region,
         "location": {
             "latitude": latitude,

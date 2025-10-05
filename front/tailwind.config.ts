@@ -25,6 +25,8 @@ module.exports = {
           amber: "#f59e0b",
           orange: "#f97316",
           red: "#ef4444",
+          cyan: "#06b6d4",
+          yellow: "#eab308",
         },
         text: {
           primary: "#ffffff",

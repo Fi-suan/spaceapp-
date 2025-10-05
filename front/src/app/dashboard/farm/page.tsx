@@ -28,6 +28,11 @@ const metricIcons = {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
   ),
+  cloud: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+    </svg>
+  ),
 }
 
 export default function FarmDashboard() {
@@ -135,6 +140,41 @@ export default function FarmDashboard() {
                 trend={{ value: `${((data?.wind_speed || 0) * 3.6).toFixed(1)} km/h`, direction: "neutral" }}
                 iconColor="text-accent-purple"
                 iconBg="bg-accent-purple/10"
+              />
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                label="Carbon Monoxide (CO)"
+                value={`${data?.air_quality_components?.co?.toFixed(2) || '0.00'} μg/m³`}
+                icon={metricIcons.cloud}
+                trend={{ value: "Air Quality", direction: "neutral" }}
+                iconColor="text-accent-red"
+                iconBg="bg-accent-red/10"
+              />
+              <StatCard
+                label="Nitrogen Dioxide (NO₂)"
+                value={`${data?.air_quality_components?.no2?.toFixed(2) || '0.00'} μg/m³`}
+                icon={metricIcons.cloud}
+                trend={{ value: "Air Quality", direction: "neutral" }}
+                iconColor="text-accent-orange"
+                iconBg="bg-accent-orange/10"
+              />
+              <StatCard
+                label="Ozone (O₃)"
+                value={`${data?.air_quality_components?.o3?.toFixed(2) || '0.00'} μg/m³`}
+                icon={metricIcons.cloud}
+                trend={{ value: "Air Quality", direction: "neutral" }}
+                iconColor="text-accent-cyan"
+                iconBg="bg-accent-cyan/10"
+              />
+              <StatCard
+                label="Sulphur Dioxide (SO₂)"
+                value={`${data?.air_quality_components?.so2?.toFixed(2) || '0.00'} μg/m³`}
+                icon={metricIcons.cloud}
+                trend={{ value: "Air Quality", direction: "neutral" }}
+                iconColor="text-accent-yellow"
+                iconBg="bg-accent-yellow/10"
               />
             </section>
 
@@ -270,6 +310,44 @@ export default function FarmDashboard() {
                       </div>
                     </div>
                     <Badge variant="green">Safe</Badge>
+                  </div>
+                )}
+              </div>
+            </ChartCard>
+
+            <ChartCard
+              title="Farming Insights"
+              subtitle="Practical tips for farmers based on current weather (Powered by GPT)"
+              icon={
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              }
+            >
+              <div className="space-y-3">
+                {data?.weather_facts && data.weather_facts.length > 0 ? (
+                  data.weather_facts.map((fact: string, index: number) => (
+                    <div key={index} className="rounded-xl bg-navy-900 p-4 border border-accent-purple/20">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-purple/20 flex-shrink-0 mt-0.5">
+                          <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-accent-purple">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                          </svg>
+                        </div>
+                        <p className="text-sm text-text-primary">{fact}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl bg-navy-900 p-4 border border-accent-purple/20">
+                    <div className="flex items-center gap-2">
+                      <span className="text-accent-purple">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </span>
+                      <p className="text-sm text-text-muted">Loading weather insights...</p>
+                    </div>
                   </div>
                 )}
               </div>

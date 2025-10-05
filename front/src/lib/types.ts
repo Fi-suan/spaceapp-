@@ -170,6 +170,11 @@ export interface DashboardAgricultureResponse {
     tempMax: number
     precipitation: number
   }>
+  recommendations?: string[]
+  risk_alerts?: Array<{
+    level: string
+    message: string
+  }>
   weather_facts?: string[]
   location: {
     latitude: number

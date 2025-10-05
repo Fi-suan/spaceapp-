@@ -155,6 +155,12 @@ export interface DashboardAgricultureResponse {
     pm2_5: number
     status: string
   }
+  air_quality_components: {
+    co: number
+    no2: number
+    o3: number
+    so2: number
+  }
   humidity: number
   precipitation: number
   wind_speed: number
@@ -164,6 +170,7 @@ export interface DashboardAgricultureResponse {
     tempMax: number
     precipitation: number
   }>
+  weather_facts?: string[]
   location: {
     latitude: number
     longitude: number
@@ -195,6 +202,20 @@ export interface DashboardInsuranceResponse {
     month: string
     riskScore: number
   }>
+  climate_risks?: Array<{
+    type: string
+    count: string
+    severity: string
+  }>
+  verified_claims?: Array<{
+    claim_id: string
+    type: string
+    location: string
+    status: string
+    evidence: string[]
+    fraud_probability: string
+  }>
+  insurance_insights?: string[]
   region: string
   location: {
     latitude: number

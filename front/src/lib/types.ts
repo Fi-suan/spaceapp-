@@ -158,6 +158,12 @@ export interface DashboardAgricultureResponse {
   humidity: number
   precipitation: number
   wind_speed: number
+  forecast_7day: Array<{
+    date: string
+    tempMin: number
+    tempMax: number
+    precipitation: number
+  }>
   location: {
     latitude: number
     longitude: number
@@ -166,9 +172,10 @@ export interface DashboardAgricultureResponse {
 
 export interface DashboardInsuranceResponse {
   weather_verified_events: Array<{
-    date: string
+    date?: string
     type: string
     severity: string
+    value?: string
   }>
   climate_summary: {
     avg_temperature: number
@@ -184,6 +191,10 @@ export interface DashboardInsuranceResponse {
       cloud_coverage: number
     }
   }
+  risk_trends: Array<{
+    month: string
+    riskScore: number
+  }>
   region: string
   location: {
     latitude: number
@@ -220,6 +231,10 @@ export interface DashboardWildfiresResponse {
     pm2_5: number
   }
   nearest_fires: NearestFire[]
+  fwi_by_region: Array<{
+    region: string
+    fwi: number
+  }>
   search_radius_km: number
   location: {
     latitude: number
@@ -249,6 +264,10 @@ export interface DashboardMainResponse {
     aqi: number
     status: string
   }
+  risk_forecast_7day: Array<{
+    date: string
+    risk: number
+  }>
   location: {
     latitude: number
     longitude: number

@@ -65,15 +65,7 @@ const navigation = [
   { label: "Wildfires", href: "/dashboard/wildfire", sector: "wildfire" },
 ]
 
-const forecastData = [
-  { date: 'Mon', risk: 67 },
-  { date: 'Tue', risk: 65 },
-  { date: 'Wed', risk: 70 },
-  { date: 'Thu', risk: 72 },
-  { date: 'Fri', risk: 68 },
-  { date: 'Sat', risk: 64 },
-  { date: 'Sun', risk: 66 },
-]
+// forecastData теперь берется из API (см. ниже в компоненте)
 
 const deltaStyles = (trend: TrendDirection) => {
   if (trend === "up") return "text-accent-green"
@@ -120,10 +112,23 @@ const getObjectIcon = (type: string) => {
 export default function Home() {
   const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY)
   const { spaceObjects, loading: spaceLoading, error: spaceError, getTypeStats, totalCount, refreshData } = useSpaceObjects()
-  const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useMainDashboard(selectedCity.latitude, selectedCity.longitude)
+  const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useMainDashboard(selectedCity.id)
 
   const loading = spaceLoading || dashboardLoading
   const error = spaceError || dashboardError
+
+  // Используем реальные данные из API или fallback к mock данным
+  const forecastData = dashboardData?.risk_forecast_7day && dashboardData.risk_forecast_7day.length > 0
+    ? dashboardData.risk_forecast_7day
+    : [
+        { date: 'Mon', risk: 67 },
+        { date: 'Tue', risk: 65 },
+        { date: 'Wed', risk: 70 },
+        { date: 'Thu', risk: 72 },
+        { date: 'Fri', risk: 68 },
+        { date: 'Sat', risk: 64 },
+        { date: 'Sun', risk: 66 },
+      ]
 
   if (loading) {
     return (

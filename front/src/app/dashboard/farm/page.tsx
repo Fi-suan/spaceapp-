@@ -30,28 +30,22 @@ const metricIcons = {
   ),
 }
 
-const forecastData = [
-  { date: 'Mon', tempMin: 12, tempMax: 24, precipitation: 0 },
-  { date: 'Tue', tempMin: 14, tempMax: 26, precipitation: 0 },
-  { date: 'Wed', tempMin: 13, tempMax: 25, precipitation: 2 },
-  { date: 'Thu', tempMin: 11, tempMax: 23, precipitation: 5 },
-  { date: 'Fri', tempMin: 15, tempMax: 27, precipitation: 0 },
-  { date: 'Sat', tempMin: 16, tempMax: 28, precipitation: 0 },
-  { date: 'Sun', tempMin: 14, tempMax: 26, precipitation: 1 },
-]
-
-const aqiData = [
-  { time: '00:00', aqi: 42 },
-  { time: '04:00', aqi: 38 },
-  { time: '08:00', aqi: 45 },
-  { time: '12:00', aqi: 52 },
-  { time: '16:00', aqi: 48 },
-  { time: '20:00', aqi: 44 },
-]
-
 export default function FarmDashboard() {
   const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY)
-  const { data, loading, error, refetch } = useAgricultureData(selectedCity.latitude, selectedCity.longitude)
+  const { data, loading, error, refetch } = useAgricultureData(selectedCity.id)
+
+  // Используем реальные данные из API или fallback к mock данным
+  const forecastData = data?.forecast_7day && data.forecast_7day.length > 0
+    ? data.forecast_7day
+    : [
+        { date: 'Mon', tempMin: 12, tempMax: 24, precipitation: 0 },
+        { date: 'Tue', tempMin: 14, tempMax: 26, precipitation: 0 },
+        { date: 'Wed', tempMin: 13, tempMax: 25, precipitation: 2 },
+        { date: 'Thu', tempMin: 11, tempMax: 23, precipitation: 5 },
+        { date: 'Fri', tempMin: 15, tempMax: 27, precipitation: 0 },
+        { date: 'Sat', tempMin: 16, tempMax: 28, precipitation: 0 },
+        { date: 'Sun', tempMin: 14, tempMax: 26, precipitation: 1 },
+      ]
 
   if (loading) {
     return (

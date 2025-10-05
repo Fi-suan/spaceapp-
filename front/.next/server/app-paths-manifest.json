@@ -1,6 +1,6 @@
 {
-  "/dashboard/wildfire/page": "app/dashboard/wildfire/page.js",
+  "/dashboard/farm/page": "app/dashboard/farm/page.js",
   "/dashboard/insurance/page": "app/dashboard/insurance/page.js",
   "/page": "app/page.js",
-  "/dashboard/farm/page": "app/dashboard/farm/page.js"
+  "/dashboard/wildfire/page": "app/dashboard/wildfire/page.js"
 }

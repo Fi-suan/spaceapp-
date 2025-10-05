@@ -126,11 +126,11 @@ class NASAPowerAPI:
             start_date: Дата начала (YYYYMMDD)
             end_date: Дата окончания (YYYYMMDD)
         """
-        # Если даты не указаны, берем последние 7 дней
+        # Если даты не указаны, берем последние 14 дней (чтобы гарантировать 7 точек с учетом задержки NASA API)
         if not start_date:
-            start_date = (datetime.now() - timedelta(days=7)).strftime("%Y%m%d")
+            start_date = (datetime.now() - timedelta(days=14)).strftime("%Y%m%d")
         if not end_date:
-            end_date = datetime.now().strftime("%Y%m%d")
+            end_date = (datetime.now() - timedelta(days=1)).strftime("%Y%m%d")  # Вчера, т.к. данные за сегодня еще нет
 
         params = {
             "parameters": "T2M,T2M_MAX,T2M_MIN,PRECTOTCORR,RH2M,WS2M",  # Температура, осадки, влажность, ветер

@@ -171,21 +171,21 @@ class ApiClient {
   }
 
   // === Dashboard Endpoints ===
-  async getDashboardAgriculture(lat: number, lon: number): Promise<DashboardAgricultureResponse> {
-    return this.request(`/dashboard/agriculture?latitude=${lat}&longitude=${lon}`)
+  async getDashboardAgriculture(cityId: string): Promise<DashboardAgricultureResponse> {
+    return this.request(`/dashboard/agriculture?city_id=${cityId}`)
   }
 
-  async getDashboardInsurance(lat: number, lon: number, region?: string): Promise<DashboardInsuranceResponse> {
+  async getDashboardInsurance(cityId: string, region?: string): Promise<DashboardInsuranceResponse> {
     const regionParam = region ? `&region=${region}` : ''
-    return this.request(`/dashboard/insurance?latitude=${lat}&longitude=${lon}${regionParam}`)
+    return this.request(`/dashboard/insurance?city_id=${cityId}${regionParam}`)
   }
 
-  async getDashboardWildfires(lat: number, lon: number, radiusKm: number = 200): Promise<DashboardWildfiresResponse> {
-    return this.request(`/dashboard/wildfires?latitude=${lat}&longitude=${lon}&radius_km=${radiusKm}`)
+  async getDashboardWildfires(cityId: string, radiusKm: number = 200): Promise<DashboardWildfiresResponse> {
+    return this.request(`/dashboard/wildfires?city_id=${cityId}&radius_km=${radiusKm}`)
   }
 
-  async getDashboardMain(lat: number, lon: number): Promise<DashboardMainResponse> {
-    return this.request(`/dashboard/main?latitude=${lat}&longitude=${lon}`)
+  async getDashboardMain(cityId: string): Promise<DashboardMainResponse> {
+    return this.request(`/dashboard/main?city_id=${cityId}`)
   }
 }
 

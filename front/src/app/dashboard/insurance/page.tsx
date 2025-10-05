@@ -8,7 +8,7 @@ import { City, DEFAULT_CITY } from '@/lib/cities'
 
 export default function InsuranceDashboard() {
   const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY)
-  const { data, loading, error, refetch } = useInsuranceData(selectedCity.latitude, selectedCity.longitude, selectedCity.nameEn)
+  const { data, loading, error, refetch } = useInsuranceData(selectedCity.id, selectedCity.nameEn)
 
   if (loading) {
     return (
@@ -36,13 +36,16 @@ export default function InsuranceDashboard() {
       </main>
     )
   }
-  const riskData = [
-    { month: 'Jan', riskScore: 45 },
-    { month: 'Feb', riskScore: 52 },
-    { month: 'Mar', riskScore: 48 },
-    { month: 'Apr', riskScore: 65 },
-    { month: 'May', riskScore: 72 },
-  ]
+  // Используем реальные данные из API или fallback к mock данным
+  const riskData = data?.risk_trends && data.risk_trends.length > 0
+    ? data.risk_trends
+    : [
+        { month: 'Jan', riskScore: 45 },
+        { month: 'Feb', riskScore: 52 },
+        { month: 'Mar', riskScore: 48 },
+        { month: 'Apr', riskScore: 65 },
+        { month: 'May', riskScore: 72 },
+      ]
 
   const metricIcons = {
     risk: (
@@ -132,7 +135,7 @@ export default function InsuranceDashboard() {
             </section>
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <ChartCard title="Regional Risk Trends" subtitle="Monthly risk scores">
+              <ChartCard title="Risk Trends (7 days)" subtitle="Daily risk scores based on weather conditions">
                 <LineChart data={riskData} xAxisKey="month" lines={[{ dataKey: 'riskScore', color: '#f59e0b' }]} height={250} />
               </ChartCard>
 

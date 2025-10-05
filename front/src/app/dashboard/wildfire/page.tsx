@@ -10,7 +10,7 @@ const DEFAULT_RADIUS = 200
 
 export default function WildfireDashboard() {
   const [selectedCity, setSelectedCity] = useState<City>(DEFAULT_CITY)
-  const { data, loading, error, refetch } = useWildfiresData(selectedCity.latitude, selectedCity.longitude, DEFAULT_RADIUS)
+  const { data, loading, error, refetch } = useWildfiresData(selectedCity.id, DEFAULT_RADIUS)
 
   if (loading) {
     return (
@@ -38,12 +38,16 @@ export default function WildfireDashboard() {
       </main>
     )
   }
-  const fwiData = [
-    { region: 'Sakha', fwi: 88 },
-    { region: 'Irkutsk', fwi: 82 },
-    { region: 'Zabaykalsky', fwi: 67 },
-    { region: 'Krasnoyarsk', fwi: 54 },
-  ]
+  // Используем реальные данные из API или fallback к mock данным
+  const fwiData = data?.fwi_by_region && data.fwi_by_region.length > 0
+    ? data.fwi_by_region
+    : [
+        { region: 'North', fwi: 88 },
+        { region: 'South', fwi: 82 },
+        { region: 'East', fwi: 67 },
+        { region: 'West', fwi: 54 },
+        { region: 'Central', fwi: 70 },
+      ]
 
   const metricIcons = {
     danger: (

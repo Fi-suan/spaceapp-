@@ -261,6 +261,23 @@ export interface DashboardWildfiresResponse {
     region: string
     fwi: number
   }>
+  spread_forecast?: {
+    direction: string
+    speed_kmh: number
+    confidence: string
+    weather_factor?: string
+  }
+  threatened_areas?: Array<{
+    name: string
+    distance_km: number
+    eta_hours: number
+    priority: string
+  }>
+  evacuation_priority?: string
+  air_quality_impact?: {
+    affected_radius_km: number
+    severity: string
+  }
   search_radius_km: number
   location: {
     latitude: number

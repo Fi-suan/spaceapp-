@@ -23,9 +23,7 @@ services:
     buildCommand: cd front && npm install && npm run build
     startCommand: cd front && npm start
     envVars:
-      - key: BACKEND_URL
-        value: https://spaceapp-backend.onrender.com
       - key: NEXT_PUBLIC_API_URL
-        value: /api/v1
+        value: https://spaceapp-backend.onrender.com/api/v1
       - key: PORT
         value: 3000

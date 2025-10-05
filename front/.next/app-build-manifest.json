@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/dashboard/farm/page": [
+    "/dashboard/insurance/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/farm/page.js"
+      "static/chunks/app/dashboard/insurance/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -11,15 +11,10 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/dashboard/insurance/page": [
+    "/dashboard/farm/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/insurance/page.js"
-    ],
-    "/dashboard/wildfire/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/wildfire/page.js"
+      "static/chunks/app/dashboard/farm/page.js"
     ],
     "/page": [
       "static/chunks/webpack.js",

@@ -261,7 +261,7 @@ export default function Home() {
               })}
             </section>
 
-            <ChartCard title="7-Day Risk Forecast" subtitle="Predicted environmental risk levels">
+            <ChartCard title="7-Day Risk Forecast" subtitle="2 days past + today + 4 days forecast">
               <LineChart
                 data={forecastData}
                 xAxisKey="date"

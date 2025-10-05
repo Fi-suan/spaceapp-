@@ -135,7 +135,7 @@ export default function InsuranceDashboard() {
             </section>
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <ChartCard title="Risk Trends (7 days)" subtitle="Daily risk scores based on weather conditions">
+              <ChartCard title="Risk Trends (7 days)" subtitle="2 days past + today + 4 days forecast">
                 <LineChart data={riskData} xAxisKey="month" lines={[{ dataKey: 'riskScore', color: '#f59e0b' }]} height={250} />
               </ChartCard>
 

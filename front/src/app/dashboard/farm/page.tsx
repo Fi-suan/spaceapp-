@@ -139,7 +139,7 @@ export default function FarmDashboard() {
             </section>
 
             <div className="grid gap-6 lg:grid-cols-2">
-              <ChartCard title="7-Day Forecast" subtitle="Temperature range and precipitation">
+              <ChartCard title="7-Day Forecast" subtitle="2 days past + today + 4 days future">
                 <LineChart
                   data={forecastData}
                   xAxisKey="date"

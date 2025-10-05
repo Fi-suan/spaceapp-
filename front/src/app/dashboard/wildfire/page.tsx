@@ -249,15 +249,15 @@ export default function WildfireDashboard() {
                         <ProgressBar
                           value={data?.aqi_smoke.aqi || 0}
                           max={300}
-                          color={data?.aqi_smoke.aqi > 150 ? 'red' : data?.aqi_smoke.aqi > 100 ? 'orange' : 'green'}
+                          color={(data?.aqi_smoke.aqi || 0) > 150 ? 'red' : (data?.aqi_smoke.aqi || 0) > 100 ? 'orange' : 'green'}
                           showPercentage={false}
                           size="sm"
                         />
                       </div>
                       <Badge variant={
-                        data?.aqi_smoke.aqi > 150 ? 'red' :
-                        data?.aqi_smoke.aqi > 100 ? 'orange' :
-                        data?.aqi_smoke.aqi > 50 ? 'amber' : 'green'
+                        (data?.aqi_smoke.aqi || 0) > 150 ? 'red' :
+                        (data?.aqi_smoke.aqi || 0) > 100 ? 'orange' :
+                        (data?.aqi_smoke.aqi || 0) > 50 ? 'amber' : 'green'
                       }>
                         AQI {data?.aqi_smoke.aqi || 0}
                       </Badge>

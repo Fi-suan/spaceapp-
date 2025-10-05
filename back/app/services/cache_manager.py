@@ -67,6 +67,7 @@ class CityDataCache:
             "weather": weather,
             "air_quality": air_quality,
             "fires": fires,
+            "ai_insights": None,  # Будет заполнено при первом запросе
             "cached_at": datetime.now().isoformat(),
             "expires_at": (datetime.now() + self._update_interval).isoformat()
         }
@@ -127,6 +128,18 @@ class CityDataCache:
         self._is_running = False
         if self._background_task:
             self._background_task.cancel()
+
+    def update_ai_insights(self, city_id: str, ai_insights: Dict[str, Any]):
+        """Обновить AI инсайты для города в кэше"""
+        if city_id in self._cache:
+            self._cache[city_id]["ai_insights"] = ai_insights
+            logger.info(f"AI insights cached for {city_id}")
+
+    def get_ai_insights(self, city_id: str) -> Optional[Dict[str, Any]]:
+        """Получить закэшированные AI инсайты"""
+        if city_id in self._cache:
+            return self._cache[city_id].get("ai_insights")
+        return None
 
     def get_cache_stats(self) -> Dict[str, Any]:
         """Получить статистику кэша"""

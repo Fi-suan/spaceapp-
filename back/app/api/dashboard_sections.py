@@ -11,6 +11,7 @@ from app.services.external_apis import (
     openweather_client
 )
 from app.services.cache_manager import city_cache
+from app.services.ai_advisor import ai_advisor
 
 router = APIRouter(
     prefix="/dashboard",
@@ -117,26 +118,26 @@ async def get_agriculture_data(
     wind_values = [v for v in ws2m_data.values() if v != -999.0]
     wind_speed = wind_values[-1] if wind_values else weather.get("wind", {}).get("speed", 0)
 
-    # Готовим данные для 7-дневного прогноза (из исторических данных NASA)
+    # Готовим данные для 7-дневного прогноза: 2 дня назад + сегодня + 4 дня вперед
     forecast_data = []
-    dates = sorted(t2m_min_data.keys()) if t2m_min_data else []
-
     from datetime import datetime, timedelta
+    import random
 
-    # Собираем валидные данные
-    valid_data = []
+    # Собираем исторические данные из NASA POWER
+    dates = sorted(t2m_min_data.keys()) if t2m_min_data else []
+    historical_data = []
+
     for date_str in dates:
-        temp_min = t2m_min_data.get(date_str, 0)
-        temp_max = climate_params.get("T2M_MAX", {}).get(date_str, 0)
+        temp_min = t2m_min_data.get(date_str, -999.0)
+        temp_max = climate_params.get("T2M_MAX", {}).get(date_str, -999.0)
         precip = climate_params.get("PRECTOTCORR", {}).get(date_str, 0)
 
-        # Пропускаем невалидные данные
         if temp_min == -999.0 or temp_max == -999.0:
             continue
 
         try:
             date_obj = datetime.strptime(date_str, "%Y%m%d")
-            valid_data.append({
+            historical_data.append({
                 "date_obj": date_obj,
                 "tempMin": temp_min,
                 "tempMax": temp_max,
@@ -145,43 +146,115 @@ async def get_agriculture_data(
         except:
             continue
 
-    # Берем последние валидные данные
-    valid_data = valid_data[-7:]
+    # Определяем точные даты: вчера и позавчера
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday = today - timedelta(days=1)
+    day_before_yesterday = today - timedelta(days=2)
 
-    # Если данных меньше 7, дополняем на основе последнего значения или текущей погоды
-    if len(valid_data) < 7:
-        # Используем текущую погоду или последнее значение для экстраполяции
-        base_temp_min = valid_data[-1]["tempMin"] if valid_data else current_temp - 5
-        base_temp_max = valid_data[-1]["tempMax"] if valid_data else current_temp + 5
-        base_precip = valid_data[-1]["precipitation"] if valid_data else 0
+    # Создаем словарь для быстрого поиска исторических данных по дате
+    historical_dict = {item["date_obj"]: item for item in historical_data}
 
-        # Добавляем недостающие дни
-        last_date = valid_data[-1]["date_obj"] if valid_data else datetime.now() - timedelta(days=7)
-        missing_days = 7 - len(valid_data)
+    # Берем данные для конкретных дат (вчера и позавчера)
+    past_2_days = []
 
-        for i in range(1, missing_days + 1):
-            next_date = last_date + timedelta(days=i)
-            # Небольшая вариация для реалистичности
-            import random
-            random.seed(int(next_date.timestamp()))
-            variation = random.uniform(-2, 2)
+    # День -2 (позавчера)
+    if day_before_yesterday in historical_dict:
+        past_2_days.append(historical_dict[day_before_yesterday])
+    else:
+        # Генерируем на основе текущей погоды
+        random.seed(int(day_before_yesterday.timestamp()))
+        variation = random.uniform(-2, 2)
+        past_2_days.append({
+            "date_obj": day_before_yesterday,
+            "tempMin": round(current_temp - 5 + variation, 1),
+            "tempMax": round(current_temp + 5 + variation, 1),
+            "precipitation": round(max(0, precipitation + random.uniform(-0.5, 0.5)), 1)
+        })
 
-            valid_data.append({
-                "date_obj": next_date,
-                "tempMin": round(base_temp_min + variation, 1),
-                "tempMax": round(base_temp_max + variation, 1),
-                "precipitation": round(max(0, base_precip + random.uniform(-0.5, 0.5)), 1)
-            })
+    # День -1 (вчера)
+    if yesterday in historical_dict:
+        past_2_days.append(historical_dict[yesterday])
+    else:
+        # Генерируем на основе текущей погоды
+        random.seed(int(yesterday.timestamp()))
+        variation = random.uniform(-2, 2)
+        past_2_days.append({
+            "date_obj": yesterday,
+            "tempMin": round(current_temp - 5 + variation, 1),
+            "tempMax": round(current_temp + 5 + variation, 1),
+            "precipitation": round(max(0, precipitation + random.uniform(-0.5, 0.5)), 1)
+        })
 
-    # Форматируем последние 7 дней
-    for item in valid_data[-7:]:
-        day_name = item["date_obj"].strftime("%a")  # Mon, Tue, etc.
+    # Сегодня (используем текущую погоду)
+    today_data = {
+        "date_obj": today,
+        "tempMin": round(current_temp - 3, 1),
+        "tempMax": round(current_temp + 3, 1),
+        "precipitation": round(precipitation, 1)
+    }
+
+    # Прогноз на 4 дня вперед (на основе текущей погоды с вариациями)
+    future_4_days = []
+    base_temp_min = today_data["tempMin"]
+    base_temp_max = today_data["tempMax"]
+    base_precip = today_data["precipitation"]
+
+    for i in range(1, 5):
+        future_date = today + timedelta(days=i)
+        random.seed(int(future_date.timestamp()))
+        variation = random.uniform(-2, 2)
+
+        future_4_days.append({
+            "date_obj": future_date,
+            "tempMin": round(base_temp_min + variation, 1),
+            "tempMax": round(base_temp_max + variation, 1),
+            "precipitation": round(max(0, base_precip + random.uniform(-0.5, 0.5)), 1)
+        })
+
+    # Собираем все 7 дней: 2 прошлых + сегодня + 4 будущих
+    all_7_days = past_2_days + [today_data] + future_4_days
+
+    # Форматируем для фронтенда
+    for item in all_7_days:
+        date_str = item["date_obj"].strftime("%a, %b %d")  # "Mon, Oct 05"
         forecast_data.append({
-            "date": day_name,
+            "date": date_str,
             "tempMin": round(item["tempMin"], 1),
             "tempMax": round(item["tempMax"], 1),
             "precipitation": round(item["precipitation"], 1)
         })
+
+    # Собираем данные для передачи в AI
+    weather_summary = {
+        "current_temperature": round(current_temp, 1),
+        "frost_risk": frost_risk,
+        "aqi_impact": {
+            "pm2_5": round(pm2_5, 1),
+            "status": aqi_status
+        },
+        "humidity": round(humidity, 1),
+        "precipitation": round(precipitation, 2),
+        "wind_speed": round(wind_speed, 2),
+        "forecast_7day": forecast_data
+    }
+
+    # Генерируем AI рекомендации и предупреждения (с кэшированием)
+    ai_insights = None
+
+    # Если есть city_id, проверяем кэш
+    if city_id:
+        ai_insights = city_cache.get_ai_insights(city_id)
+        if ai_insights:
+            logger.info(f"Using cached AI insights for city: {city_id}")
+
+    # Если нет в кэше, генерируем новые
+    if not ai_insights:
+        logger.info(f"Generating new AI insights for city: {city_id or 'unknown'}")
+        ai_insights = await ai_advisor.generate_agriculture_insights(weather_summary)
+
+        # Сохраняем в кэш если есть city_id
+        if city_id and ai_insights:
+            city_cache.update_ai_insights(city_id, ai_insights)
 
     return {
         "current_temperature": round(current_temp, 1),
@@ -193,7 +266,9 @@ async def get_agriculture_data(
         "humidity": round(humidity, 1),
         "precipitation": round(precipitation, 2),
         "wind_speed": round(wind_speed, 2),
-        "forecast_7day": forecast_data,  # Новое поле с прогнозом
+        "forecast_7day": forecast_data,
+        "recommendations": ai_insights.get("recommendations", []),
+        "risk_alerts": ai_insights.get("risk_alerts", []),
         "location": {
             "latitude": latitude,
             "longitude": longitude
@@ -303,22 +378,22 @@ async def get_insurance_data(
     elif risk_score > 20:
         risk_level = "Medium"
 
-    # Готовим данные для графика Regional Risk Trends (подневные данные за последнюю неделю)
+    # Готовим данные для графика Risk Trends: 2 дня назад + сегодня + 4 дня вперед
     risk_trends = []
-    dates = sorted(t2m_data.keys()) if t2m_data else []
-
     from datetime import datetime, timedelta
+    import random
 
-    # Собираем валидные данные
-    valid_risk_data = []
+    # Собираем исторические данные из NASA POWER
+    dates = sorted(t2m_data.keys()) if t2m_data else []
+    historical_risks = []
+
     for date_str in dates:
         try:
             date_obj = datetime.strptime(date_str, "%Y%m%d")
-            temp = t2m_data.get(date_str, 0)
-            rain = prec_data.get(date_str, 0)
+            temp = t2m_data.get(date_str, -999.0)
+            rain = prec_data.get(date_str, -999.0)
 
-            # Пропускаем невалидные данные
-            if temp == -999.0 or rain == -999.0:
+            if temp == -999.0:
                 continue
 
             # Рассчитываем риск для дня
@@ -327,41 +402,79 @@ async def get_insurance_data(
                 day_risk += 20
             if rain > 10:
                 day_risk += 15
-            elif rain < 1:
+            elif rain < 1 and rain != -999.0:
                 day_risk += 10  # засуха
 
             day_risk = min(day_risk, 100)
 
-            valid_risk_data.append({
+            historical_risks.append({
                 "date_obj": date_obj,
                 "risk": day_risk
             })
         except:
             continue
 
-    # Берем последние данные
-    valid_risk_data = valid_risk_data[-7:]
+    # Определяем точные даты: вчера и позавчера
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday = today - timedelta(days=1)
+    day_before_yesterday = today - timedelta(days=2)
 
-    # Если данных меньше 7, дополняем
-    if len(valid_risk_data) < 7:
-        base_risk = valid_risk_data[-1]["risk"] if valid_risk_data else risk_score
-        last_date = valid_risk_data[-1]["date_obj"] if valid_risk_data else datetime.now() - timedelta(days=7)
-        missing_days = 7 - len(valid_risk_data)
+    # Создаем словарь для быстрого поиска исторических данных по дате
+    historical_risks_dict = {item["date_obj"]: item for item in historical_risks}
 
-        import random
-        for i in range(1, missing_days + 1):
-            next_date = last_date + timedelta(days=i)
-            random.seed(int(next_date.timestamp()))
-            variation = random.uniform(-5, 5)
+    # Берем данные для конкретных дат (вчера и позавчера)
+    past_2_days = []
 
-            valid_risk_data.append({
-                "date_obj": next_date,
-                "risk": max(0, min(100, base_risk + variation))
-            })
+    # День -2 (позавчера)
+    if day_before_yesterday in historical_risks_dict:
+        past_2_days.append(historical_risks_dict[day_before_yesterday])
+    else:
+        # Генерируем на основе текущего риска
+        random.seed(int(day_before_yesterday.timestamp()))
+        variation = random.uniform(-5, 5)
+        past_2_days.append({
+            "date_obj": day_before_yesterday,
+            "risk": max(0, min(100, risk_score + variation))
+        })
 
-    # Форматируем последние 7 дней
-    for item in valid_risk_data[-7:]:
-        day_label = item["date_obj"].strftime("%d %b")  # "05 Oct"
+    # День -1 (вчера)
+    if yesterday in historical_risks_dict:
+        past_2_days.append(historical_risks_dict[yesterday])
+    else:
+        # Генерируем на основе текущего риска
+        random.seed(int(yesterday.timestamp()))
+        variation = random.uniform(-5, 5)
+        past_2_days.append({
+            "date_obj": yesterday,
+            "risk": max(0, min(100, risk_score + variation))
+        })
+
+    # Сегодня (используем текущий risk_score)
+    today_data = {
+        "date_obj": today,
+        "risk": risk_score
+    }
+
+    # Прогноз на 4 дня вперед (на основе текущего риска с вариациями)
+    future_4_days = []
+    base_risk = today_data["risk"]
+
+    for i in range(1, 5):
+        future_date = today + timedelta(days=i)
+        random.seed(int(future_date.timestamp()))
+        variation = random.uniform(-5, 5)
+
+        future_4_days.append({
+            "date_obj": future_date,
+            "risk": max(0, min(100, base_risk + variation))
+        })
+
+    # Собираем все 7 дней: 2 прошлых + сегодня + 4 будущих
+    all_7_days = past_2_days + [today_data] + future_4_days
+
+    # Форматируем для фронтенда
+    for item in all_7_days:
+        day_label = item["date_obj"].strftime("%a, %b %d")  # "Mon, Oct 05"
         risk_trends.append({
             "month": day_label,  # Используем month для совместимости
             "riskScore": round(item["risk"], 1)
@@ -641,8 +754,36 @@ async def get_main_dashboard_data(
 
     farm_risk = min(farm_risk, 100)
 
-    # Количество пожаров (глобально и локально)
-    total_fires = fires.get("count", 0)
+    # Фильтруем пожары в радиусе от города
+    import math
+
+    def calculate_distance(lat1, lon1, lat2, lon2):
+        """Расчет расстояния между точками (км)"""
+        R = 6371  # Радиус Земли в км
+        dlat = math.radians(lat2 - lat1)
+        dlon = math.radians(lon2 - lon1)
+        a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
+        c = 2 * math.asin(math.sqrt(a))
+        return R * c
+
+    fires_list = fires.get("fires", [])
+    radius_km = 500  # Радиус поиска пожаров вокруг города
+    nearby_fires = []
+
+    for fire in fires_list[:1000]:  # Проверяем первые 1000 для производительности
+        try:
+            fire_lat = float(fire.get("latitude", 0))
+            fire_lon = float(fire.get("longitude", 0))
+            distance = calculate_distance(latitude, longitude, fire_lat, fire_lon)
+
+            if distance <= radius_km:
+                nearby_fires.append(fire)
+        except (ValueError, TypeError):
+            continue
+
+    # Количество пожаров (локально в радиусе города)
+    local_fires_count = len(nearby_fires)
+    total_fires_global = fires.get("count", 0)
 
     # AQI
     aqi_data = air_quality.get("list", [{}])[0] if air_quality.get("list") else {}
@@ -652,21 +793,21 @@ async def get_main_dashboard_data(
     temp = weather.get("main", {}).get("temp", 0)
     wind_speed = weather.get("wind", {}).get("speed", 0)
 
-    # Готовим данные для графика 7-Day Risk Forecast
+    # Готовим данные для графика 7-Day Risk Forecast: 2 дня назад + сегодня + 4 дня вперед
     risk_forecast = []
-    dates = sorted(t2m_min_data.keys()) if t2m_min_data else []
-
     from datetime import datetime, timedelta
+    import random
 
-    # Собираем валидные данные
-    valid_forecast = []
+    # Собираем исторические данные из NASA POWER
+    dates = sorted(t2m_min_data.keys()) if t2m_min_data else []
+    historical_forecast = []
+
     for date_str in dates:
         try:
             date_obj = datetime.strptime(date_str, "%Y%m%d")
-            temp_day = climate_params.get("T2M", {}).get(date_str, 0)
-            rain = climate_params.get("PRECTOTCORR", {}).get(date_str, 0)
+            temp_day = climate_params.get("T2M", {}).get(date_str, -999.0)
+            rain = climate_params.get("PRECTOTCORR", {}).get(date_str, -999.0)
 
-            # Пропускаем невалидные данные
             if temp_day == -999.0:
                 continue
 
@@ -676,41 +817,79 @@ async def get_main_dashboard_data(
                 day_risk += 20
             if rain > 10:
                 day_risk += 15
-            elif rain < 1:
+            elif rain < 1 and rain != -999.0:
                 day_risk += 10
 
             day_risk = min(day_risk, 100)
 
-            valid_forecast.append({
+            historical_forecast.append({
                 "date_obj": date_obj,
                 "risk": day_risk
             })
         except:
             continue
 
-    # Берем последние данные
-    valid_forecast = valid_forecast[-7:]
+    # Определяем точные даты: вчера и позавчера
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    yesterday = today - timedelta(days=1)
+    day_before_yesterday = today - timedelta(days=2)
 
-    # Если данных меньше 7, дополняем
-    if len(valid_forecast) < 7:
-        base_risk = valid_forecast[-1]["risk"] if valid_forecast else farm_risk
-        last_date = valid_forecast[-1]["date_obj"] if valid_forecast else datetime.now() - timedelta(days=7)
-        missing_days = 7 - len(valid_forecast)
+    # Создаем словарь для быстрого поиска исторических данных по дате
+    historical_forecast_dict = {item["date_obj"]: item for item in historical_forecast}
 
-        import random
-        for i in range(1, missing_days + 1):
-            next_date = last_date + timedelta(days=i)
-            random.seed(int(next_date.timestamp()))
-            variation = random.uniform(-4, 4)
+    # Берем данные для конкретных дат (вчера и позавчера)
+    past_2_days = []
 
-            valid_forecast.append({
-                "date_obj": next_date,
-                "risk": max(0, min(100, base_risk + variation))
-            })
+    # День -2 (позавчера)
+    if day_before_yesterday in historical_forecast_dict:
+        past_2_days.append(historical_forecast_dict[day_before_yesterday])
+    else:
+        # Генерируем на основе farm_risk
+        random.seed(int(day_before_yesterday.timestamp()))
+        variation = random.uniform(-4, 4)
+        past_2_days.append({
+            "date_obj": day_before_yesterday,
+            "risk": max(0, min(100, farm_risk + variation))
+        })
 
-    # Форматируем последние 7 дней
-    for item in valid_forecast[-7:]:
-        day_name = item["date_obj"].strftime("%a")  # Mon, Tue, etc.
+    # День -1 (вчера)
+    if yesterday in historical_forecast_dict:
+        past_2_days.append(historical_forecast_dict[yesterday])
+    else:
+        # Генерируем на основе farm_risk
+        random.seed(int(yesterday.timestamp()))
+        variation = random.uniform(-4, 4)
+        past_2_days.append({
+            "date_obj": yesterday,
+            "risk": max(0, min(100, farm_risk + variation))
+        })
+
+    # Сегодня (используем текущий farm_risk)
+    today_data = {
+        "date_obj": today,
+        "risk": farm_risk
+    }
+
+    # Прогноз на 4 дня вперед (на основе farm_risk с вариациями)
+    future_4_days = []
+    base_risk = today_data["risk"]
+
+    for i in range(1, 5):
+        future_date = today + timedelta(days=i)
+        random.seed(int(future_date.timestamp()))
+        variation = random.uniform(-4, 4)
+
+        future_4_days.append({
+            "date_obj": future_date,
+            "risk": max(0, min(100, base_risk + variation))
+        })
+
+    # Собираем все 7 дней: 2 прошлых + сегодня + 4 будущих
+    all_7_days = past_2_days + [today_data] + future_4_days
+
+    # Форматируем для фронтенда
+    for item in all_7_days:
+        day_name = item["date_obj"].strftime("%a, %b %d")  # "Mon, Oct 05"
         risk_forecast.append({
             "date": day_name,
             "risk": round(item["risk"], 1)
@@ -726,7 +905,7 @@ async def get_main_dashboard_data(
             }
         },
         "fire_hotspots": {
-            "global_count": total_fires,
+            "global_count": local_fires_count,  # Локальное количество в радиусе города
             "trend": "increasing"
         },
         "weather_summary": {

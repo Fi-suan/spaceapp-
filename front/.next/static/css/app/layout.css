@@ -548,8 +548,14 @@ video {
 .ml-0 {
   margin-left: 0px;
 }
+.ml-2 {
+  margin-left: 0.5rem;
+}
 .mr-1\.5 {
   margin-right: 0.375rem;
+}
+.mt-0\.5 {
+  margin-top: 0.125rem;
 }
 .mt-1 {
   margin-top: 0.25rem;
@@ -658,6 +664,9 @@ video {
 }
 .flex-1 {
   flex: 1 1 0%;
+}
+.flex-shrink-0 {
+  flex-shrink: 0;
 }
 .rotate-180 {
   --tw-rotate: 180deg;
@@ -812,6 +821,9 @@ video {
 }
 .bg-accent-green\/10 {
   background-color: rgb(16 185 129 / 0.1);
+}
+.bg-accent-green\/20 {
+  background-color: rgb(16 185 129 / 0.2);
 }
 .bg-accent-orange {
   --tw-bg-opacity: 1;

@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, selectedCity, onC
           className="w-full h-auto"
           priority
         />
-        <p className="text-xs text-text-subtle mt-2 text-center">NASA Space Apps 2024</p>
+        <p className="text-xs text-text-subtle mt-2 text-center">NASA Space Apps 2025</p>
       </div>
 
       <nav className="flex flex-1 flex-col gap-8">

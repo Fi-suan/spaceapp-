@@ -3,6 +3,9 @@
 import { useState } from 'react'
 import { useSpaceObjects } from '@/hooks/useSpaceObjects'
 import { useMainDashboard } from '@/hooks/useMainDashboard'
+import { useAgricultureData } from '@/hooks/useAgricultureData'
+import { useInsuranceData } from '@/hooks/useInsuranceData'
+import { useWildfiresData } from '@/hooks/useWildfiresData'
 import { StatCard, ProgressBar, Badge, ChartCard, Sidebar } from '@/components/shared'
 import { LineChart } from '@/components/charts/LineChart'
 import { City, DEFAULT_CITY } from '@/lib/cities'
@@ -114,7 +117,12 @@ export default function Home() {
   const { spaceObjects, loading: spaceLoading, error: spaceError, getTypeStats, totalCount, refreshData } = useSpaceObjects()
   const { data: dashboardData, loading: dashboardLoading, error: dashboardError, refetch } = useMainDashboard(selectedCity.id)
 
-  const loading = spaceLoading || dashboardLoading
+  // Загружаем данные для всех трех карточек
+  const { data: agricultureData, loading: agriLoading } = useAgricultureData(selectedCity.id)
+  const { data: insuranceData, loading: insuranceLoading } = useInsuranceData(selectedCity.id, selectedCity.nameEn)
+  const { data: wildfiresData, loading: wildfiresLoading } = useWildfiresData(selectedCity.id, 200)
+
+  const loading = spaceLoading || dashboardLoading || agriLoading || insuranceLoading || wildfiresLoading
   const error = spaceError || dashboardError
 
   // Используем реальные данные из API или fallback к mock данным
@@ -280,15 +288,23 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Current Temperature</p>
-                    <p className="text-lg font-semibold text-white">28°C <span className="text-xs text-accent-green">↑ +3°</span></p>
+                    <p className="text-lg font-semibold text-white">
+                      {agricultureData?.current_temperature?.toFixed(1) || '--'}°C
+                    </p>
                   </div>
                   <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Frost Risk (24h)</p>
-                    <p className="text-lg font-semibold text-white">12% <span className="text-xs text-text-subtle">Low</span></p>
+                    <p className="text-lg font-semibold text-white">
+                      {agricultureData?.frost_risk?.percentage || '--'}%
+                      <span className="text-xs text-text-subtle ml-2">{agricultureData?.frost_risk?.status || 'Low'}</span>
+                    </p>
                   </div>
                   <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">AQI Impact</p>
-                    <p className="text-lg font-semibold text-white">Moderate <span className="text-xs text-accent-amber">PM2.5: 45</span></p>
+                    <p className="text-lg font-semibold text-white">
+                      {agricultureData?.aqi_impact?.status || 'Moderate'}
+                      <span className="text-xs text-accent-amber ml-2">PM2.5: {agricultureData?.aqi_impact?.pm2_5?.toFixed(0) || '--'}</span>
+                    </p>
                   </div>
                 </div>
                 <a href="/dashboard/farm" className="mt-4 block w-full rounded-lg bg-navy-600 px-3 py-2 text-center text-xs font-medium text-text-secondary hover:bg-navy-500 transition-colors">
@@ -300,20 +316,29 @@ export default function Home() {
                 title="Insurance"
                 subtitle="Claims Verification"
                 icon={metricIcons.shield}
-                action={<Badge variant="amber" size="sm">23 Claims</Badge>}
+                action={<Badge variant="amber" size="sm">{insuranceData?.weather_verified_events?.length || 0} Events</Badge>}
               >
                 <div className="space-y-3">
                   <div className="rounded-lg bg-navy-900 p-3">
-                    <p className="text-xs text-text-muted">Verified Claims</p>
-                    <p className="text-lg font-semibold text-white">18 <span className="text-xs text-accent-green">✓ NASA Data</span></p>
+                    <p className="text-xs text-text-muted">Risk Assessment</p>
+                    <p className="text-lg font-semibold text-white">
+                      {insuranceData?.risk_assessment?.level || 'Low'}
+                      <span className="text-xs text-text-subtle ml-2">Score: {insuranceData?.risk_assessment?.score || 0}</span>
+                    </p>
                   </div>
                   <div className="rounded-lg bg-navy-900 p-3">
-                    <p className="text-xs text-text-muted">Pending Review</p>
-                    <p className="text-lg font-semibold text-white">5 <span className="text-xs text-text-subtle">Manual Check</span></p>
+                    <p className="text-xs text-text-muted">Avg Temperature</p>
+                    <p className="text-lg font-semibold text-white">
+                      {insuranceData?.climate_summary?.avg_temperature?.toFixed(1) || '--'}°C
+                      <span className="text-xs text-text-subtle ml-2">{insuranceData?.climate_summary?.days_analyzed || 0} days</span>
+                    </p>
                   </div>
                   <div className="rounded-lg bg-navy-900 p-3">
-                    <p className="text-xs text-text-muted">Fraud Risk</p>
-                    <p className="text-lg font-semibold text-white">Low <span className="text-xs text-accent-green">8% avg</span></p>
+                    <p className="text-xs text-text-muted">Total Precipitation</p>
+                    <p className="text-lg font-semibold text-white">
+                      {insuranceData?.climate_summary?.total_precipitation?.toFixed(1) || '--'} mm
+                      <span className="text-xs text-accent-blue ml-2">{insuranceData?.region || 'Region'}</span>
+                    </p>
                   </div>
                 </div>
                 <a href="/dashboard/insurance" className="mt-4 block w-full rounded-lg bg-navy-600 px-3 py-2 text-center text-xs font-medium text-text-secondary hover:bg-navy-500 transition-colors">
@@ -325,20 +350,42 @@ export default function Home() {
                 title="Wildfires"
                 subtitle="Real-time Monitoring"
                 icon={metricIcons.fire}
-                action={<Badge variant="red" size="sm">47 Active</Badge>}
+                action={<Badge variant="red" size="sm">{wildfiresData?.active_fires_count || 0} Active</Badge>}
               >
                 <div className="space-y-3">
                   <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Fire Danger Index</p>
-                    <p className="text-lg font-semibold text-white">92/100 <span className="text-xs text-accent-red">Critical</span></p>
+                    <p className="text-lg font-semibold text-white">
+                      {wildfiresData?.fire_danger_index?.value || '--'}/100
+                      <span className={`text-xs ml-2 ${
+                        wildfiresData?.fire_danger_index?.level === 'Critical' ? 'text-accent-red' :
+                        wildfiresData?.fire_danger_index?.level === 'High' ? 'text-accent-orange' :
+                        wildfiresData?.fire_danger_index?.level === 'Medium' ? 'text-accent-amber' :
+                        'text-accent-green'
+                      }`}>
+                        {wildfiresData?.fire_danger_index?.level || 'Low'}
+                      </span>
+                    </p>
                   </div>
                   <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">Wind Speed</p>
-                    <p className="text-lg font-semibold text-white">25 km/h <span className="text-xs text-accent-amber">→ NE</span></p>
+                    <p className="text-lg font-semibold text-white">
+                      {wildfiresData?.wind_conditions?.speed_kmh?.toFixed(0) || '--'} km/h
+                      <span className="text-xs text-accent-amber ml-2">→ {wildfiresData?.wind_conditions?.direction || 'N'}</span>
+                    </p>
                   </div>
                   <div className="rounded-lg bg-navy-900 p-3">
                     <p className="text-xs text-text-muted">AQI (Smoke)</p>
-                    <p className="text-lg font-semibold text-white">201 <span className="text-xs text-accent-red">Hazardous</span></p>
+                    <p className="text-lg font-semibold text-white">
+                      {wildfiresData?.aqi_smoke?.aqi || '--'}
+                      <span className={`text-xs ml-2 ${
+                        wildfiresData?.aqi_smoke?.status === 'Hazardous' || wildfiresData?.aqi_smoke?.status === 'Very Poor' ? 'text-accent-red' :
+                        wildfiresData?.aqi_smoke?.status === 'Poor' ? 'text-accent-orange' :
+                        'text-accent-green'
+                      }`}>
+                        {wildfiresData?.aqi_smoke?.status || 'Good'}
+                      </span>
+                    </p>
                   </div>
                 </div>
                 <a href="/dashboard/wildfire" className="mt-4 block w-full rounded-lg bg-navy-600 px-3 py-2 text-center text-xs font-medium text-text-secondary hover:bg-navy-500 transition-colors">

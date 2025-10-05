@@ -177,69 +177,101 @@ export default function FarmDashboard() {
             </div>
 
             <ChartCard
-              title="Recommendations"
-              subtitle="Based on current weather conditions"
+              title="AI Recommendations"
+              subtitle="Based on current weather conditions (Powered by GPT)"
               icon={
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               }
             >
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <div className="rounded-xl bg-navy-900 p-4 border border-accent-green/20">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="text-accent-green"><CheckIcon /></span>
-                    <span className="text-sm font-semibold text-text-primary">Spraying Safe</span>
+              <div className="space-y-3">
+                {data?.recommendations && data.recommendations.length > 0 ? (
+                  data.recommendations.map((recommendation: string, index: number) => (
+                    <div key={index} className="rounded-xl bg-navy-900 p-4 border border-accent-green/20">
+                      <div className="flex items-start gap-3">
+                        <span className="text-accent-green flex-shrink-0 mt-0.5"><CheckIcon /></span>
+                        <p className="text-sm text-text-primary">{recommendation}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-xl bg-navy-900 p-4 border border-accent-blue/20">
+                    <div className="flex items-center gap-2">
+                      <span className="text-accent-blue"><CheckIcon /></span>
+                      <p className="text-sm text-text-muted">Loading AI recommendations...</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-text-muted">Wind speed optimal, no rain forecast for 24h</p>
-                </div>
-                <div className="rounded-xl bg-navy-900 p-4 border border-accent-amber/20">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="text-accent-amber"><AlertTriangleIcon /></span>
-                    <span className="text-sm font-semibold text-text-primary">Frost Warning</span>
-                  </div>
-                  <p className="text-xs text-text-muted">Possible frost tonight (-2°C). Cover sensitive crops</p>
-                </div>
-                <div className="rounded-xl bg-navy-900 p-4 border border-accent-blue/20">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="text-accent-blue"><SproutIcon /></span>
-                    <span className="text-sm font-semibold text-text-primary">Best Planting Days</span>
-                  </div>
-                  <p className="text-xs text-text-muted">Friday and Saturday ideal for sowing</p>
-                </div>
+                )}
               </div>
             </ChartCard>
 
-            <ChartCard title="Risk Alerts" subtitle="Critical conditions requiring attention">
+            <ChartCard title="AI Risk Alerts" subtitle="Critical conditions detected by AI (Powered by GPT)">
               <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-xl bg-accent-red/10 p-4 border border-accent-red/20">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-red/20">
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-accent-red">
-                        <circle cx="12" cy="12" r="10" />
-                      </svg>
+                {data?.risk_alerts && data.risk_alerts.length > 0 ? (
+                  data.risk_alerts.map((alert: { level: string; message: string }, index: number) => {
+                    const alertConfig = {
+                      critical: {
+                        bg: 'bg-accent-red/10',
+                        border: 'border-accent-red/20',
+                        iconBg: 'bg-accent-red/20',
+                        iconColor: 'text-accent-red',
+                        textColor: 'text-accent-red',
+                        badge: 'red' as const
+                      },
+                      warning: {
+                        bg: 'bg-accent-amber/10',
+                        border: 'border-accent-amber/20',
+                        iconBg: 'bg-accent-amber/20',
+                        iconColor: 'text-accent-amber',
+                        textColor: 'text-accent-amber',
+                        badge: 'amber' as const
+                      },
+                      info: {
+                        bg: 'bg-accent-blue/10',
+                        border: 'border-accent-blue/20',
+                        iconBg: 'bg-accent-blue/20',
+                        iconColor: 'text-accent-blue',
+                        textColor: 'text-accent-blue',
+                        badge: 'blue' as const
+                      }
+                    }
+
+                    const config = alertConfig[alert.level as keyof typeof alertConfig] || alertConfig.info
+
+                    return (
+                      <div key={index} className={`flex items-center justify-between rounded-xl p-4 border ${config.bg} ${config.border}`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`flex h-10 w-10 items-center justify-center rounded-full ${config.iconBg}`}>
+                            <svg viewBox="0 0 24 24" fill="currentColor" className={`h-6 w-6 ${config.iconColor}`}>
+                              <circle cx="12" cy="12" r="10" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className={`font-semibold ${config.textColor}`}>{alert.level.charAt(0).toUpperCase() + alert.level.slice(1)}</p>
+                            <p className="text-sm text-text-muted">{alert.message}</p>
+                          </div>
+                        </div>
+                        <Badge variant={config.badge}>{alert.level}</Badge>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="flex items-center justify-between rounded-xl bg-accent-green/10 p-4 border border-accent-green/20">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-green/20">
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-accent-green">
+                          <circle cx="12" cy="12" r="10" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-accent-green">All Clear</p>
+                        <p className="text-sm text-text-muted">No significant weather risks detected</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-semibold text-accent-red">High Frost Risk</p>
-                      <p className="text-sm text-text-muted">May 23-24, temperatures down to -3°C</p>
-                    </div>
+                    <Badge variant="green">Safe</Badge>
                   </div>
-                  <Badge variant="red">Critical</Badge>
-                </div>
-                <div className="flex items-center justify-between rounded-xl bg-accent-amber/10 p-4 border border-accent-amber/20">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-amber/20">
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-6 w-6 text-accent-amber">
-                        <circle cx="12" cy="12" r="10" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="font-semibold text-accent-amber">Drought Warning</p>
-                      <p className="text-sm text-text-muted">No precipitation for 14 days</p>
-                    </div>
-                  </div>
-                  <Badge variant="amber">Medium</Badge>
-                </div>
+                )}
               </div>
             </ChartCard>
           </div>

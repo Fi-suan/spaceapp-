@@ -18,6 +18,12 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1'
 
+console.log('[API] Initializing API client:', {
+  NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  API_BASE_URL,
+  NODE_ENV: process.env.NODE_ENV
+})
+
 export interface SpaceObject {
   id: number
   name: string
@@ -43,6 +49,13 @@ class ApiClient {
   private async request<T>(endpoint: string, options?: RequestInit): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`
 
+    console.log('[API] Request:', {
+      url,
+      baseUrl: this.baseUrl,
+      endpoint,
+      method: options?.method || 'GET'
+    })
+
     const config: RequestInit = {
       headers: {
         'Content-Type': 'application/json',
@@ -54,13 +67,33 @@ class ApiClient {
     try {
       const response = await fetch(url, config)
 
+      console.log('[API] Response:', {
+        url,
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok
+      })
+
       if (!response.ok) {
+        const errorText = await response.text().catch(() => 'No error details')
+        console.error('[API] Error response:', {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      return await response.json()
+      const data = await response.json()
+      console.log('[API] Success:', { url, dataKeys: Object.keys(data) })
+      return data
     } catch (error) {
-      console.error('API request failed:', error)
+      console.error('[API] Request failed:', {
+        url,
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      })
       throw error
     }
   }

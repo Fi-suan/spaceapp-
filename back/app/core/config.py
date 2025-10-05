@@ -6,7 +6,12 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
 
     # CORS настройки
-    allowed_origins: list = ["http://localhost:3000", "http://127.0.0.1:3000", "*"]  # Next.js dev server
+    allowed_origins: list = [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://spaceapp-c5mm.onrender.com",  # Production frontend
+        "*"
+    ]
     allow_credentials: bool = True
     allowed_methods: list = ["*"]
     allowed_headers: list = ["*"]

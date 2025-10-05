@@ -10,7 +10,6 @@ class Settings(BaseSettings):
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://spaceapp-c5mm.onrender.com",  # Production frontend
-        "*"
     ]
     allow_credentials: bool = True
     allowed_methods: list = ["*"]

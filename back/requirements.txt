@@ -1,7 +1,7 @@
-fastapi
-uvicorn[standard]
-pydantic
-pydantic-settings
+fastapi==0.118.0
+uvicorn[standard]==0.34.0
+pydantic==2.10.6
+pydantic-settings==2.11.0
 python-multipart
-openai
-httpx
+openai==1.88.0
+httpx==0.28.1

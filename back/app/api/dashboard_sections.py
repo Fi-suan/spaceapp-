@@ -480,6 +480,45 @@ async def get_insurance_data(
             "riskScore": round(item["risk"], 1)
         })
 
+    # Собираем данные для AI
+    insurance_summary = {
+        "weather_verified_events": extreme_events,
+        "climate_summary": {
+            "avg_temperature": round(sum(temps) / len(temps), 1) if temps else 0,
+            "total_precipitation": round(sum(precip), 1) if precip else 0,
+            "days_analyzed": len(temps)
+        },
+        "risk_assessment": {
+            "score": risk_score,
+            "level": risk_level,
+            "factors": {
+                "temperature": round(current_temp, 1),
+                "wind_speed": round(current_wind, 1),
+                "cloud_coverage": current_clouds
+            }
+        },
+        "region": region
+    }
+
+    # Генерируем AI инсайты для страховых компаний (с кэшированием)
+    ai_insights = None
+
+    # Проверяем кэш для insurance AI insights (отдельный ключ)
+    insurance_cache_key = f"{city_id}_insurance" if city_id else None
+    if insurance_cache_key:
+        ai_insights = city_cache.get_ai_insights(insurance_cache_key)
+        if ai_insights:
+            logger.info(f"Using cached AI insurance insights for city: {city_id}")
+
+    # Генерируем новые если нет в кэше
+    if not ai_insights:
+        logger.info(f"Generating new AI insurance insights for city: {city_id or 'unknown'}")
+        ai_insights = await ai_advisor.generate_insurance_insights(insurance_summary)
+
+        # Сохраняем в кэш
+        if insurance_cache_key and ai_insights:
+            city_cache.update_ai_insights(insurance_cache_key, ai_insights)
+
     return {
         "weather_verified_events": extreme_events,
         "climate_summary": {
@@ -496,7 +535,9 @@ async def get_insurance_data(
                 "cloud_coverage": current_clouds
             }
         },
-        "risk_trends": risk_trends,  # Новое поле для графика
+        "risk_trends": risk_trends,
+        "climate_risks": ai_insights.get("climate_risks", []),
+        "verified_claims": ai_insights.get("verified_claims", []),
         "region": region,
         "location": {
             "latitude": latitude,
@@ -662,6 +703,42 @@ async def get_wildfires_data(
             "fwi": min(region_fwi, 100)
         })
 
+    # Собираем данные для AI прогноза
+    wildfire_summary = {
+        "active_fires_count": len(nearby_fires),
+        "fire_danger_index": {
+            "value": fdi,
+            "level": danger_level
+        },
+        "wind_conditions": {
+            "speed_kmh": round(wind_speed * 3.6, 1),
+            "direction": wind_direction
+        },
+        "nearest_fires": nearby_fires[:5],
+        "temperature": temp,
+        "humidity": humidity,
+        "region": "Fire monitoring area"
+    }
+
+    # Генерируем AI прогноз пожаров (с кэшированием)
+    ai_insights = None
+
+    # Проверяем кэш для wildfire AI insights (отдельный ключ)
+    wildfire_cache_key = f"{city_id}_wildfire" if city_id else None
+    if wildfire_cache_key:
+        ai_insights = city_cache.get_ai_insights(wildfire_cache_key)
+        if ai_insights:
+            logger.info(f"Using cached AI wildfire insights for city: {city_id}")
+
+    # Генерируем новые если нет в кэше
+    if not ai_insights:
+        logger.info(f"Generating new AI wildfire insights for city: {city_id or 'unknown'}")
+        ai_insights = await ai_advisor.generate_wildfire_insights(wildfire_summary)
+
+        # Сохраняем в кэш
+        if wildfire_cache_key and ai_insights:
+            city_cache.update_ai_insights(wildfire_cache_key, ai_insights)
+
     return {
         "active_fires_count": len(nearby_fires),
         "total_fires_global": fires.get("count", 0),
@@ -680,8 +757,12 @@ async def get_wildfires_data(
             "status": aqi_status,
             "pm2_5": round(pm2_5, 1)
         },
-        "nearest_fires": nearby_fires[:10],  # Топ 10 ближайших
-        "fwi_by_region": fwi_by_region,  # Новое поле для графика
+        "nearest_fires": nearby_fires[:10],
+        "fwi_by_region": fwi_by_region,
+        "spread_forecast": ai_insights.get("spread_forecast", {}),
+        "threatened_areas": ai_insights.get("threatened_areas", []),
+        "evacuation_priority": ai_insights.get("evacuation_priority", "monitor"),
+        "air_quality_impact": ai_insights.get("air_quality_impact", {}),
         "search_radius_km": radius_km,
         "location": {
             "latitude": latitude,

@@ -139,46 +139,77 @@ export default function InsuranceDashboard() {
                 <LineChart data={riskData} xAxisKey="month" lines={[{ dataKey: 'riskScore', color: '#f59e0b' }]} height={250} />
               </ChartCard>
 
-              <ChartCard title="Climate Risks" subtitle="Current period">
+              <ChartCard title="AI Climate Risks" subtitle="Powered by GPT - Insurance risk analysis">
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
-                    <span className="text-sm text-text-secondary">Frost Events</span>
-                    <Badge variant="dark">2 events</Badge>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
-                    <span className="text-sm text-text-secondary">Drought Days</span>
-                    <Badge variant="dark">18 days</Badge>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
-                    <span className="text-sm text-text-secondary">Fire Incidents</span>
-                    <Badge variant="dark">3 within 50km</Badge>
-                  </div>
-                  <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
-                    <span className="text-sm text-text-secondary">NDVI Change</span>
-                    <Badge variant="red">-12% vs last year</Badge>
-                  </div>
+                  {data?.climate_risks && data.climate_risks.length > 0 ? (
+                    data.climate_risks.map((risk: { type: string; count: string; severity: string }, index: number) => {
+                      const severityConfig = {
+                        critical: 'red' as const,
+                        high: 'amber' as const,
+                        medium: 'blue' as const,
+                        low: 'green' as const
+                      }
+                      const variant = severityConfig[risk.severity as keyof typeof severityConfig] || 'dark' as const
+
+                      return (
+                        <div key={index} className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
+                          <span className="text-sm text-text-secondary">{risk.type}</span>
+                          <Badge variant={variant}>{risk.count}</Badge>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
+                      <span className="text-sm text-text-secondary">Loading climate risks...</span>
+                      <Badge variant="dark">-</Badge>
+                    </div>
+                  )}
                 </div>
               </ChartCard>
             </div>
 
-            <ChartCard title="Claim Verification" subtitle="Recent insurance claims">
+            <ChartCard title="AI Claim Verification" subtitle="AI-generated verified claims (Powered by GPT)">
               <div className="space-y-3">
-                <div className="rounded-xl bg-navy-900 p-4 border border-border-subtle">
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="font-semibold text-white">Claim #4521 - Drought Loss</p>
-                      <p className="text-sm text-text-muted">Krasnoyarsk Region, May 2024</p>
-                    </div>
-                    <Badge variant="green">Verified</Badge>
+                {data?.verified_claims && data.verified_claims.length > 0 ? (
+                  data.verified_claims.map((claim: {
+                    claim_id: string;
+                    type: string;
+                    location: string;
+                    status: string;
+                    evidence: string[];
+                    fraud_probability: string
+                  }, index: number) => {
+                    const statusConfig = {
+                      verified: { variant: 'green' as const, label: 'Verified' },
+                      pending: { variant: 'amber' as const, label: 'Pending' },
+                      rejected: { variant: 'red' as const, label: 'Rejected' }
+                    }
+                    const config = statusConfig[claim.status as keyof typeof statusConfig] || statusConfig.verified
+
+                    return (
+                      <div key={index} className="rounded-xl bg-navy-900 p-4 border border-border-subtle">
+                        <div className="flex items-center justify-between mb-3">
+                          <div>
+                            <p className="font-semibold text-white">{claim.claim_id} - {claim.type}</p>
+                            <p className="text-sm text-text-muted">{claim.location}</p>
+                          </div>
+                          <Badge variant={config.variant}>{config.label}</Badge>
+                        </div>
+                        <div className="space-y-2">
+                          {claim.evidence && claim.evidence.map((evidence: string, i: number) => (
+                            <p key={i} className="text-sm text-text-secondary">✓ {evidence}</p>
+                          ))}
+                          <p className="text-sm text-accent-green">Fraud probability: {claim.fraud_probability}</p>
+                        </div>
+                        <button className="mt-3 text-sm text-accent-blue hover:underline">Download PDF Report →</button>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="rounded-xl bg-navy-900 p-4 border border-border-subtle">
+                    <p className="text-sm text-text-muted">No verified claims available. AI is analyzing weather data...</p>
                   </div>
-                  <div className="space-y-2">
-                    <p className="text-sm text-text-secondary">✓ 0 mm precipitation: May 01-19</p>
-                    <p className="text-sm text-text-secondary">✓ Temperature &gt;30°C: 14 days</p>
-                    <p className="text-sm text-text-secondary">✓ NDVI dropped 28%</p>
-                    <p className="text-sm text-accent-green">Fraud probability: 8% (Low)</p>
-                  </div>
-                  <button className="mt-3 text-sm text-accent-blue hover:underline">Download PDF Report →</button>
-                </div>
+                )}
               </div>
             </ChartCard>
           </div>

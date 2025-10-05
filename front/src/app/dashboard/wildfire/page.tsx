@@ -175,70 +175,125 @@ export default function WildfireDashboard() {
               </ChartCard>
             </div>
 
-            <ChartCard title="Spread Forecast" subtitle="Fire #3421 - Threat assessment">
+            <ChartCard title="AI Spread Forecast" subtitle="Powered by GPT - Fire behavior prediction">
               <div className="space-y-4">
                 <div className="rounded-xl bg-navy-900 p-4 border border-border-subtle">
-                  <p className="font-semibold text-white mb-3">Weather Conditions</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <span className="text-text-muted text-sm">Wind:</span>{' '}
-                      <span className="text-white">25 km/h NE</span>
+                  <p className="font-semibold text-white mb-3">Predicted Spread Direction</p>
+                  {data?.spread_forecast && Object.keys(data.spread_forecast).length > 0 ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-text-muted text-sm">Direction:</span>{' '}
+                        <span className="text-white">{data.spread_forecast.direction || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-text-muted text-sm">Speed:</span>{' '}
+                        <span className="text-white">{data.spread_forecast.speed_kmh || 0} km/h</span>
+                      </div>
+                      <div>
+                        <span className="text-text-muted text-sm">Confidence:</span>{' '}
+                        <span className="text-white capitalize">{data.spread_forecast.confidence || 'medium'}</span>
+                      </div>
+                      <div>
+                        <span className="text-text-muted text-sm">FDI:</span>{' '}
+                        <span className="text-accent-red">{data.fire_danger_index.value}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-text-muted text-sm">Humidity:</span>{' '}
-                      <span className="text-white">18%</span>
-                    </div>
-                    <div>
-                      <span className="text-text-muted text-sm">Temp:</span>{' '}
-                      <span className="text-white">34°C</span>
-                    </div>
-                    <div>
-                      <span className="text-text-muted text-sm">FWI:</span>{' '}
-                      <span className="text-accent-red">92</span>
-                    </div>
-                  </div>
+                  ) : (
+                    <p className="text-sm text-text-muted">No active fires for forecast</p>
+                  )}
+                  {data?.spread_forecast?.weather_factor && (
+                    <p className="text-xs text-text-subtle mt-3">Factor: {data.spread_forecast.weather_factor}</p>
+                  )}
                 </div>
-                <div className="rounded-xl bg-accent-red/10 p-4 border border-accent-red/20">
-                  <div className="flex items-center gap-2 mb-2">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="h-5 w-5 text-accent-red">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    <p className="font-semibold text-accent-red">Evacuation Required</p>
+
+                {data?.threatened_areas && data.threatened_areas.length > 0 ? (
+                  data.threatened_areas.map((area: { name: string; distance_km: number; eta_hours: number; priority: string }, idx: number) => {
+                    const priorityConfig = {
+                      critical: { bg: 'bg-accent-red/10', border: 'border-accent-red/20', color: 'text-accent-red', badge: 'red' as const },
+                      high: { bg: 'bg-accent-orange/10', border: 'border-accent-orange/20', color: 'text-accent-orange', badge: 'orange' as const },
+                      moderate: { bg: 'bg-accent-amber/10', border: 'border-accent-amber/20', color: 'text-accent-amber', badge: 'amber' as const },
+                      low: { bg: 'bg-accent-blue/10', border: 'border-accent-blue/20', color: 'text-accent-blue', badge: 'blue' as const }
+                    }
+                    const config = priorityConfig[area.priority as keyof typeof priorityConfig] || priorityConfig.moderate
+
+                    return (
+                      <div key={idx} className={`rounded-xl p-4 border ${config.bg} ${config.border}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className={`h-5 w-5 ${config.color}`}>
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <p className={`font-semibold ${config.color}`}>{area.priority.charAt(0).toUpperCase() + area.priority.slice(1)} Priority</p>
+                          <Badge variant={config.badge} className="ml-auto">{data.evacuation_priority}</Badge>
+                        </div>
+                        <p className="text-sm text-text-secondary mb-1">• {area.name}</p>
+                        <p className="text-sm text-text-secondary mb-3">• Distance: {area.distance_km} km | ETA: ~{area.eta_hours} hours</p>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="rounded-xl bg-accent-green/10 p-4 border border-accent-green/20">
+                    <p className="text-sm text-accent-green">No immediate threats detected. Continue monitoring.</p>
                   </div>
-                  <p className="text-sm text-text-secondary mb-1">• Settlement "Berezovka" (15 km, ETA ~4 hours)</p>
-                  <p className="text-sm text-text-secondary mb-3">• Protected forest zone (8 km, ETA ~2 hours)</p>
-                  <div className="flex gap-2">
-                    <button className="rounded-lg bg-accent-red px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-red/80">
-                      Dispatch Brigade
-                    </button>
-                    <button className="rounded-lg bg-navy-700 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-navy-600">
-                      Alert Residents
-                    </button>
-                  </div>
-                </div>
+                )}
               </div>
             </ChartCard>
 
-            <ChartCard title="Air Quality - Affected Areas" subtitle="Smoke pollution levels">
+            <ChartCard title="Air Quality Impact" subtitle="Smoke pollution from wildfires">
               <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
-                  <span className="text-text-secondary">Krasnoyarsk</span>
-                  <div className="flex items-center gap-3">
-                    <div className="w-32">
-                      <ProgressBar value={201} max={300} color="red" showPercentage={false} size="sm" />
+                <div className="rounded-xl bg-navy-900 p-4 border border-border-subtle">
+                  <p className="font-semibold text-white mb-3">Current AQI</p>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-text-secondary">{selectedCity.name}</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-32">
+                        <ProgressBar
+                          value={data?.aqi_smoke.aqi || 0}
+                          max={300}
+                          color={data?.aqi_smoke.aqi > 150 ? 'red' : data?.aqi_smoke.aqi > 100 ? 'orange' : 'green'}
+                          showPercentage={false}
+                          size="sm"
+                        />
+                      </div>
+                      <Badge variant={
+                        data?.aqi_smoke.aqi > 150 ? 'red' :
+                        data?.aqi_smoke.aqi > 100 ? 'orange' :
+                        data?.aqi_smoke.aqi > 50 ? 'amber' : 'green'
+                      }>
+                        AQI {data?.aqi_smoke.aqi || 0}
+                      </Badge>
                     </div>
-                    <Badge variant="red">AQI 201</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 mt-3">
+                    <div>
+                      <span className="text-text-muted text-sm">Status:</span>{' '}
+                      <span className="text-white">{data?.aqi_smoke.status || 'Good'}</span>
+                    </div>
+                    <div>
+                      <span className="text-text-muted text-sm">PM2.5:</span>{' '}
+                      <span className="text-white">{data?.aqi_smoke.pm2_5 || 0} µg/m³</span>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between rounded-lg bg-navy-900 p-3">
-                  <span className="text-text-secondary">Abakan</span>
-                  <div className="flex items-center gap-3">
-                    <div className="w-32">
-                      <ProgressBar value={156} max={300} color="orange" showPercentage={false} size="sm" />
-                    </div>
-                    <Badge variant="orange">AQI 156</Badge>
+
+                {data?.air_quality_impact && (
+                  <div className="rounded-xl bg-navy-900 p-4 border border-border-subtle">
+                    <p className="font-semibold text-white mb-2">Smoke Impact Forecast</p>
+                    <p className="text-sm text-text-secondary mb-1">
+                      Affected radius: ~{data.air_quality_impact.affected_radius_km || 0} km
+                    </p>
+                    <p className="text-sm text-text-secondary">
+                      Severity: <span className="capitalize">{data.air_quality_impact.severity || 'low'}</span>
+                    </p>
                   </div>
-                </div>
+                )}
+
+                {data?.active_fires_count > 0 && (
+                  <div className="rounded-xl bg-accent-amber/10 p-3 border border-accent-amber/20">
+                    <p className="text-xs text-text-secondary">
+                      ⚠️ {data.active_fires_count} active fire{data.active_fires_count > 1 ? 's' : ''} within {data.search_radius_km} km may impact air quality
+                    </p>
+                  </div>
+                )}
               </div>
             </ChartCard>
           </div>

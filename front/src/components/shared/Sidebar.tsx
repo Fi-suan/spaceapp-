@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { City, KAZAKHSTAN_CITIES } from '@/lib/cities'
+import { City, CITIES } from '@/lib/cities'
 
 const navIcons = {
   dashboard: (
@@ -145,8 +145,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeRoute, selectedCity, onC
             </svg>
           </button>
           {isDropdownOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 rounded-lg bg-navy-900 border border-border-subtle shadow-xl overflow-hidden">
-              {KAZAKHSTAN_CITIES.map((city) => (
+            <div className="absolute bottom-full left-0 right-0 mb-2 max-h-96 overflow-y-auto rounded-lg bg-navy-900 border border-border-subtle shadow-xl">
+              {CITIES.map((city) => (
                 <button
                   key={city.id}
                   onClick={() => {

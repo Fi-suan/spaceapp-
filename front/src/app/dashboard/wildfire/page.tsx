@@ -287,10 +287,10 @@ export default function WildfireDashboard() {
                   </div>
                 )}
 
-                {data?.active_fires_count > 0 && (
+                {(data?.active_fires_count || 0) > 0 && (
                   <div className="rounded-xl bg-accent-amber/10 p-3 border border-accent-amber/20">
                     <p className="text-xs text-text-secondary">
-                      ⚠️ {data.active_fires_count} active fire{data.active_fires_count > 1 ? 's' : ''} within {data.search_radius_km} km may impact air quality
+                      ⚠️ {data?.active_fires_count} active fire{(data?.active_fires_count || 0) > 1 ? 's' : ''} within {data?.search_radius_km} km may impact air quality
                     </p>
                   </div>
                 )}

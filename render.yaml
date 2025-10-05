@@ -4,15 +4,14 @@ services:
     name: spaceapp-backend
     runtime: python
     plan: free
-    buildCommand: pip install -r back/requirements.txt
-    startCommand: cd back && python app.py
+    rootDir: back
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: OPENAI_API_KEY
-        sync: false
+        generateValue: true
       - key: OPENWEATHERMAP_API_KEY
-        sync: false
-      - key: PORT
-        value: 8080
+        value: 3cb51132b357bb5dabdcfe87f5ff9d9e
     healthCheckPath: /health
 
   # Frontend Service

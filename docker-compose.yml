@@ -2,25 +2,43 @@ version: '3.8'
 
 services:
   backend:
-    build: ./back
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    container_name: spaceapp-backend
     ports:
-      - "8001:8001"
+      - "8080:8080"
     environment:
-      - HOST=0.0.0.0
-      - PORT=8001
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENWEATHERMAP_API_KEY=${OPENWEATHERMAP_API_KEY}
     volumes:
-      - ./back:/app
-    working_dir: /app
+      - ./back/logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   frontend:
-    build: ./front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    container_name: spaceapp-frontend
     ports:
       - "3000:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8001/api/v1
-    volumes:
-      - ./front:/app
-      - /app/node_modules
-    working_dir: /app
+      - NEXT_PUBLIC_API_URL=/api/v1
     depends_on:
       - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  logs:

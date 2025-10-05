@@ -1,0 +1,31 @@
+services:
+  # Backend Service
+  - type: web
+    name: spaceapp-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r back/requirements.txt
+    startCommand: cd back && python app.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENWEATHERMAP_API_KEY
+        sync: false
+      - key: PORT
+        value: 8080
+    healthCheckPath: /health
+
+  # Frontend Service
+  - type: web
+    name: spaceapp-frontend
+    runtime: node
+    plan: free
+    buildCommand: cd front && npm install && npm run build
+    startCommand: cd front && npm start
+    envVars:
+      - key: BACKEND_URL
+        value: https://spaceapp-backend.onrender.com
+      - key: NEXT_PUBLIC_API_URL
+        value: /api/v1
+      - key: PORT
+        value: 3000
